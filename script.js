@@ -1,15 +1,25 @@
-document.addEventListener('DOMContentLoaded', function() {
-    const message = document.getElementById('message');
-    const text = "Hello World, I'm Jose Jordan";
-    let i = 0;
-
-    function typeWriter() {
-        if (i < text.length) {
-            message.innerHTML += text.charAt(i);
-            i++;
-            setTimeout(typeWriter, 100);
+function typeCommand() {
+        if (commandIndex < commandText.length) {
+            command.textContent += commandText.charAt(commandIndex);
+            commandIndex++;
+            setTimeout(typeCommand, 100);
+        } else {
+            setTimeout(executeCommand, 500);
         }
     }
 
-    setTimeout(typeWriter, 1000);
+    function executeCommand() {
+        command.textContent += '\n';
+        setTimeout(typeOutput, 500);
+    }
+
+    function typeOutput() {
+        if (outputIndex < outputText.length) {
+            output.textContent += outputText.charAt(outputIndex);
+            outputIndex++;
+            setTimeout(typeOutput, 100);
+        }
+    }
+
+    setTimeout(typeCommand, 1000);
 });
