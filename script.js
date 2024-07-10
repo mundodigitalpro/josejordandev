@@ -1,32 +1,34 @@
 document.addEventListener('DOMContentLoaded', function() {
     const command = document.getElementById('command');
     const output = document.getElementById('output');
-    const commandText = "echo 'Hello World, I'm Jose Jordan'";
-    const outputText = "Hello World, I'm Jose Jordan";
-    let commandIndex = 0;
-    let outputIndex = 0;
+    const debug = document.getElementById('debug');
+    
+    debug.textContent = "JavaScript is running";
 
-    function typeCommand() {
-        if (commandIndex < commandText.length) {
-            command.textContent += commandText.charAt(commandIndex);
-            commandIndex++;
-            setTimeout(typeCommand, 100);
-        } else {
-            setTimeout(executeCommand, 500);
+    function writeText(element, text) {
+        let index = 0;
+        function addChar() {
+            if (index < text.length) {
+                element.textContent += text.charAt(index);
+                index++;
+                setTimeout(addChar, 100);
+            }
         }
+        addChar();
     }
 
-    function executeCommand() {
-        setTimeout(typeOutput, 500);
-    }
+    writeText(command, "echo 'Hello World, I'm Jose Jordan'");
+    
+    setTimeout(() => {
+        writeText(output, "Hello World, I'm Jose Jordan");
+    }, 3000);
 
-    function typeOutput() {
-        if (outputIndex < outputText.length) {
-            output.textContent += outputText.charAt(outputIndex);
-            outputIndex++;
-            setTimeout(typeOutput, 100);
-        }
-    }
-
-    typeCommand();
+    console.log("JavaScript execution completed");
 });
+
+// Log any errors
+window.onerror = function(message, source, lineno, colno, error) {
+    console.error("Error: ", message, "at", source, ":", lineno);
+    document.getElementById('debug').textContent += "\nError: " + message;
+    return true;
+};
