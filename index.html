@@ -3,11 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hello World - Jose Jordan</title>
+    <title>Terminal - Jose Jordan</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1 id="message"></h1>
+    <div class="terminal">
+        <div class="terminal-header">
+            <div class="terminal-button red"></div>
+            <div class="terminal-button yellow"></div>
+            <div class="terminal-button green"></div>
+        </div>
+        <div class="terminal-window">
+            <p><span class="prompt">$</span> <span id="command"></span></p>
+            <p id="output"></p>
+        </div>
+    </div>
     <script src="script.js"></script>
 </body>
 </html>
