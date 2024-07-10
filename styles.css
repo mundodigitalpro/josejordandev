@@ -5,21 +5,51 @@ body {
     align-items: center;
     height: 100vh;
     margin: 0;
-    background-color: #f0f0f0;
+    background-color: #2b2b2b;
 }
 
-h1 {
-    font-size: 2rem;
-    color: #333;
-    border-right: 2px solid #333;
-    white-space: nowrap;
+.terminal {
+    width: 600px;
+    background-color: #1e1e1e;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
     overflow: hidden;
-    margin: 0 auto;
-    letter-spacing: 0.15em;
-    animation: blink-caret 0.75s step-end infinite;
 }
 
-@keyframes blink-caret {
-    from, to { border-color: transparent }
-    50% { border-color: #333 }
+.terminal-header {
+    background-color: #323232;
+    padding: 10px;
+    display: flex;
+    gap: 5px;
+}
+
+.terminal-button {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.red { background-color: #ff5f56; }
+.yellow { background-color: #ffbd2e; }
+.green { background-color: #27c93f; }
+
+.terminal-window {
+    padding: 20px;
+    color: #f0f0f0;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.prompt {
+    color: #5af78e;
+}
+
+#command::after {
+    content: '|';
+    animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+    from, to { opacity: 0; }
+    50% { opacity: 1; }
 }
