@@ -1,4 +1,12 @@
-function typeCommand() {
+document.addEventListener('DOMContentLoaded', function() {
+    const command = document.getElementById('command');
+    const output = document.getElementById('output');
+    const commandText = "echo 'Hello World, I'm Jose Jordan'";
+    const outputText = "Hello World, I'm Jose Jordan";
+    let commandIndex = 0;
+    let outputIndex = 0;
+
+    function typeCommand() {
         if (commandIndex < commandText.length) {
             command.textContent += commandText.charAt(commandIndex);
             commandIndex++;
@@ -9,7 +17,6 @@ function typeCommand() {
     }
 
     function executeCommand() {
-        command.textContent += '\n';
         setTimeout(typeOutput, 500);
     }
 
@@ -21,5 +28,5 @@ function typeCommand() {
         }
     }
 
-    setTimeout(typeCommand, 1000);
+    typeCommand();
 });
