@@ -74,7 +74,10 @@ Su enfoque se centra en crear soluciones eficientes y escalables para problemas 
         } else {
             switch(command.toLowerCase()) {
                 case 'help':
-                    output.innerHTML = 'Comandos disponibles:\n' + Object.entries(commands).map(([cmd, desc]) => `• <span class="highlight">${cmd}</span>: ${desc}`).join('\n');
+                    output.innerHTML = 'Comandos disponibles:<br>' + 
+                        Object.entries(commands)
+                            .map(([cmd, desc]) => `• <span class="highlight">${cmd}</span>: ${desc}`)
+                            .join('<br>');
                     break;
                 case 'clear':
                     terminalWindow.innerHTML = '';
