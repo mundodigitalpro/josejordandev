@@ -50,8 +50,21 @@ body {
     color: #5af78e;
 }
 
-#command::after {
-    content: '|';
+.input-line {
+    display: flex;
+    align-items: center;
+}
+
+.command {
+    margin-left: 8px;
+}
+
+.cursor {
+    display: inline-block;
+    width: 8px;
+    height: 15px;
+    background-color: #f0f0f0;
+    margin-left: 4px;
     animation: blink 1s step-end infinite;
 }
 
