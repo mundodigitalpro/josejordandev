@@ -69,8 +69,6 @@ document.addEventListener('DOMContentLoaded', function() {
         terminal.classList.toggle('maximized');
         if (terminal.classList.contains('maximized')) {
             terminal.style.transform = "none";
-            xOffset = 0;
-            yOffset = 0;
         } else {
             setTranslate(xOffset, yOffset, terminal);
         }
