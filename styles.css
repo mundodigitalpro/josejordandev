@@ -39,11 +39,13 @@ body {
 
 .icon i {
     font-size: 40px; /* Tamaño reducido de 48px a 40px */
+    width: 40px; /* Tamaño reducido de 50px a 40px */
+    height: 40px; /* Tamaño reducido de 50px a 40px */
     color: #fff;
     margin-bottom: 10px;
     background-color: rgba(255, 255, 255, 0.1);
     padding: 15px;
-    border-radius: 10px;
+    border-radius: 5px;
     transition: box-shadow 0.3s;
 }
 
