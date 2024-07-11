@@ -198,6 +198,27 @@ Su enfoque se centra en crear soluciones eficientes y escalables para problemas 
 
     document.addEventListener('keydown', handleInput);
 
+    // Funcionalidad para los iconos del escritorio
+    const desktopIcons = document.querySelectorAll('.icon');
+    
+    desktopIcons.forEach(icon => {
+        icon.addEventListener('click', function() {
+            const iconName = this.querySelector('span').textContent;
+            switch(iconName) {
+                case 'Proyectos':
+                    executeCommand('projects');
+                    break;
+                case 'CV.pdf':
+                    alert('Abriendo CV.pdf...');
+                    // Aquí podrías añadir código para abrir realmente un PDF
+                    break;
+                case 'Contacto':
+                    executeCommand('contact');
+                    break;
+            }
+        });
+    });
+
     window.addEventListener('load', function() {
         terminalWindow.click();
         createNewPrompt();
