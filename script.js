@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const terminalWindow = document.getElementById('terminal-window');
     let currentCommand = '';
     let currentPrompt;
-    let currentCursor;
 
     const commands = {
         'help': 'Muestra esta lista de comandos',
@@ -37,12 +36,14 @@ Su enfoque se centra en crear soluciones eficientes y escalables para problemas 
     };
 
     function createNewPrompt() {
+        if (currentPrompt) {
+            currentPrompt.querySelector('.cursor').remove();
+        }
         const promptLine = document.createElement('p');
         promptLine.className = 'input-line';
-        promptLine.innerHTML = '<span class="prompt">$</span> <span class="command"></span><span class="cursor"></span>';
+        promptLine.innerHTML = '<span class="prompt">$</span> <span class="command"></span><span class="cursor">|</span>';
         terminalWindow.appendChild(promptLine);
-        currentPrompt = promptLine.querySelector('.command');
-        currentCursor = promptLine.querySelector('.cursor');
+        currentPrompt = promptLine;
         terminalWindow.scrollTop = terminalWindow.scrollHeight;
     }
 
@@ -77,27 +78,25 @@ Su enfoque se centra en crear soluciones eficientes y escalables para problemas 
 
     function handleInput(e) {
         if (e.key === 'Enter') {
-            const commandLine = currentPrompt.parentElement.cloneNode(true);
-            commandLine.querySelector('.command').textContent = currentCommand;
+            const commandLine = currentPrompt.cloneNode(true);
             commandLine.querySelector('.cursor').remove();
-            terminalWindow.insertBefore(commandLine, currentPrompt.parentElement);
+            terminalWindow.replaceChild(commandLine, currentPrompt);
             executeCommand(currentCommand);
             currentCommand = '';
-            currentPrompt.textContent = '';
         } else if (e.key === 'Backspace') {
             currentCommand = currentCommand.slice(0, -1);
-            currentPrompt.textContent = currentCommand;
         } else if (e.key.length === 1) {
             currentCommand += e.key;
-            currentPrompt.textContent = currentCommand;
+        } else {
+            return;
         }
+        currentPrompt.querySelector('.command').textContent = currentCommand;
         terminalWindow.scrollTop = terminalWindow.scrollHeight;
         e.preventDefault();
     }
 
     document.addEventListener('keydown', handleInput);
 
-    // Asegurarse de que la terminal tenga el foco al cargar la página
     window.addEventListener('load', function() {
         terminalWindow.click();
         createNewPrompt();
