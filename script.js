@@ -100,7 +100,6 @@ Su enfoque se centra en crear soluciones eficientes y escalables para problemas 
     // Asegurarse de que la terminal tenga el foco al cargar la página
     window.addEventListener('load', function() {
         terminalWindow.click();
+        createNewPrompt();
     });
-
-    createNewPrompt();
 });
