@@ -10,7 +10,10 @@ document.addEventListener('DOMContentLoaded', function() {
         'projects': 'Lista de proyectos destacados',
         'contact': 'Información de contacto',
         'clear': 'Limpia la pantalla',
-        'echo': 'Repite el texto que escribas'
+        'echo': 'Repite el texto que escribas con un toque especial',
+        'date': 'Muestra la fecha y hora actual',
+        'joke': 'Cuenta un chiste de programación',
+        'quote': 'Muestra una cita inspiradora sobre programación'
     };
 
     const commandResponses = {
@@ -35,6 +38,20 @@ Su enfoque se centra en crear soluciones eficientes y escalables para problemas 
 • Twitter: @josejordan_dev`
     };
 
+    const jokes = [
+        "¿Por qué los programadores prefieren el frío? Porque tienen un problema con el calor-sync.",
+        "¿Cómo se llama un desarrollador que no sabe programar en C? De-C-sarrollador.",
+        "¿Por qué los programadores siempre confunden Halloween con Navidad? Porque oct 31 == dec 25.",
+        "Un programador va al supermercado. Su esposa le dice: 'Compra una barra de pan y si hay huevos, trae 6'. Vuelve con 6 barras de pan."
+    ];
+
+    const quotes = [
+        "El arte de programar consiste en organizar y dominar la complejidad. - Edsger W. Dijkstra",
+        "La programación no es sobre tipear, es sobre pensar. - Rich Hickey",
+        "El código es como el humor. Cuando tienes que explicarlo, es malo. - Cory House",
+        "Medir el progreso del desarrollo de software por líneas de código es como medir el progreso de la construcción de un avión por su peso. - Bill Gates"
+    ];
+
     function createNewPrompt() {
         if (currentPrompt) {
             currentPrompt.querySelector('.cursor').remove();
@@ -52,7 +69,8 @@ Su enfoque se centra en crear soluciones eficientes y escalables para problemas 
         output.className = 'output';
 
         if (command.startsWith('echo ')) {
-            output.textContent = command.slice(5);
+            const text = command.slice(5);
+            output.innerHTML = `<span style="color: #ff79c6;">${text}</span> (eco... eco... eco...)`;
         } else {
             switch(command.toLowerCase()) {
                 case 'help':
@@ -60,6 +78,15 @@ Su enfoque se centra en crear soluciones eficientes y escalables para problemas 
                     break;
                 case 'clear':
                     terminalWindow.innerHTML = '';
+                    break;
+                case 'date':
+                    output.textContent = new Date().toLocaleString();
+                    break;
+                case 'joke':
+                    output.textContent = jokes[Math.floor(Math.random() * jokes.length)];
+                    break;
+                case 'quote':
+                    output.textContent = quotes[Math.floor(Math.random() * quotes.length)];
                     break;
                 default:
                     if (commandResponses[command]) {
