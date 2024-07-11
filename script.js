@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const terminalWindow = document.getElementById('terminal-window');
     let currentCommand = '';
     let currentPrompt;
+    let currentCursor;
 
     const commands = {
         'help': 'Muestra esta lista de comandos',
@@ -37,9 +38,11 @@ Su enfoque se centra en crear soluciones eficientes y escalables para problemas 
 
     function createNewPrompt() {
         const promptLine = document.createElement('p');
-        promptLine.innerHTML = '<span class="prompt">$</span> <span class="command"></span>';
+        promptLine.className = 'input-line';
+        promptLine.innerHTML = '<span class="prompt">$</span> <span class="command"></span><span class="cursor"></span>';
         terminalWindow.appendChild(promptLine);
         currentPrompt = promptLine.querySelector('.command');
+        currentCursor = promptLine.querySelector('.cursor');
         terminalWindow.scrollTop = terminalWindow.scrollHeight;
     }
 
@@ -74,8 +77,9 @@ Su enfoque se centra en crear soluciones eficientes y escalables para problemas 
 
     function handleInput(e) {
         if (e.key === 'Enter') {
-            const commandLine = document.createElement('p');
-            commandLine.innerHTML = `<span class="prompt">$</span> ${currentCommand}`;
+            const commandLine = currentPrompt.parentElement.cloneNode(true);
+            commandLine.querySelector('.command').textContent = currentCommand;
+            commandLine.querySelector('.cursor').remove();
             terminalWindow.insertBefore(commandLine, currentPrompt.parentElement);
             executeCommand(currentCommand);
             currentCommand = '';
@@ -87,10 +91,16 @@ Su enfoque se centra en crear soluciones eficientes y escalables para problemas 
             currentCommand += e.key;
             currentPrompt.textContent = currentCommand;
         }
+        terminalWindow.scrollTop = terminalWindow.scrollHeight;
         e.preventDefault();
     }
 
     document.addEventListener('keydown', handleInput);
+
+    // Asegurarse de que la terminal tenga el foco al cargar la página
+    window.addEventListener('load', function() {
+        terminalWindow.click();
+    });
 
     createNewPrompt();
 });
