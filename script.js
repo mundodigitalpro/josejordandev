@@ -9,7 +9,8 @@ document.addEventListener('DOMContentLoaded', function() {
         'skills': 'Muestra las habilidades técnicas',
         'projects': 'Lista de proyectos destacados',
         'contact': 'Información de contacto',
-        'clear': 'Limpia la pantalla'
+        'clear': 'Limpia la pantalla',
+        'echo': 'Repite el texto que escribas'
     };
 
     const commandResponses = {
@@ -42,37 +43,27 @@ Su enfoque se centra en crear soluciones eficientes y escalables para problemas 
         terminalWindow.scrollTop = terminalWindow.scrollHeight;
     }
 
-    function typeCommand(text) {
-        let index = 0;
-        function addChar() {
-            if (index < text.length) {
-                currentPrompt.textContent += text.charAt(index);
-                index++;
-                setTimeout(addChar, 50);
-            } else {
-                executeCommand(text);
-            }
-        }
-        addChar();
-    }
-
     function executeCommand(command) {
         const output = document.createElement('p');
         output.className = 'output';
 
-        switch(command.toLowerCase()) {
-            case 'help':
-                output.innerHTML = 'Comandos disponibles:\n' + Object.entries(commands).map(([cmd, desc]) => `• <span class="highlight">${cmd}</span>: ${desc}`).join('\n');
-                break;
-            case 'clear':
-                terminalWindow.innerHTML = '';
-                break;
-            default:
-                if (commandResponses[command]) {
-                    output.textContent = commandResponses[command];
-                } else {
-                    output.textContent = `Comando no reconocido: ${command}. Escribe 'help' para ver los comandos disponibles.`;
-                }
+        if (command.startsWith('echo ')) {
+            output.textContent = command.slice(5);
+        } else {
+            switch(command.toLowerCase()) {
+                case 'help':
+                    output.innerHTML = 'Comandos disponibles:\n' + Object.entries(commands).map(([cmd, desc]) => `• <span class="highlight">${cmd}</span>: ${desc}`).join('\n');
+                    break;
+                case 'clear':
+                    terminalWindow.innerHTML = '';
+                    break;
+                default:
+                    if (commandResponses[command]) {
+                        output.textContent = commandResponses[command];
+                    } else {
+                        output.textContent = `Comando no reconocido: ${command}. Escribe 'help' para ver los comandos disponibles.`;
+                    }
+            }
         }
 
         if (command.toLowerCase() !== 'clear') {
@@ -81,19 +72,25 @@ Su enfoque se centra en crear soluciones eficientes y escalables para problemas 
         createNewPrompt();
     }
 
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Enter') {
+    function handleInput(e) {
+        if (e.key === 'Enter') {
+            const commandLine = document.createElement('p');
+            commandLine.innerHTML = `<span class="prompt">$</span> ${currentCommand}`;
+            terminalWindow.insertBefore(commandLine, currentPrompt.parentElement);
             executeCommand(currentCommand);
             currentCommand = '';
-        } else if (event.key === 'Backspace') {
+            currentPrompt.textContent = '';
+        } else if (e.key === 'Backspace') {
             currentCommand = currentCommand.slice(0, -1);
             currentPrompt.textContent = currentCommand;
-        } else if (event.key.length === 1) {
-            currentCommand += event.key;
+        } else if (e.key.length === 1) {
+            currentCommand += e.key;
             currentPrompt.textContent = currentCommand;
         }
-    });
+        e.preventDefault();
+    }
+
+    document.addEventListener('keydown', handleInput);
 
     createNewPrompt();
-    typeCommand("echo 'Hello World, I'm Jose Jordan'");
 });
