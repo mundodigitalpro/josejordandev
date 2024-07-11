@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const terminal = document.querySelector('.terminal');
+    const terminal = document.getElementById('terminal');
+    const terminalHeader = document.getElementById('terminal-header');
     const terminalWindow = document.getElementById('terminal-window');
     const closeButton = document.getElementById('close-button');
     const minimizeButton = document.getElementById('minimize-button');
@@ -7,6 +8,53 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentCommand = '';
     let currentPrompt;
 
+    // Funcionalidad de arrastrar y soltar
+    let isDragging = false;
+    let currentX;
+    let currentY;
+    let initialX;
+    let initialY;
+    let xOffset = 0;
+    let yOffset = 0;
+
+    terminalHeader.addEventListener("mousedown", dragStart);
+    document.addEventListener("mousemove", drag);
+    document.addEventListener("mouseup", dragEnd);
+
+    function dragStart(e) {
+        initialX = e.clientX - xOffset;
+        initialY = e.clientY - yOffset;
+
+        if (e.target === terminalHeader) {
+            isDragging = true;
+        }
+    }
+
+    function drag(e) {
+        if (isDragging) {
+            e.preventDefault();
+            currentX = e.clientX - initialX;
+            currentY = e.clientY - initialY;
+
+            xOffset = currentX;
+            yOffset = currentY;
+
+            setTranslate(currentX, currentY, terminal);
+        }
+    }
+
+    function dragEnd(e) {
+        initialX = currentX;
+        initialY = currentY;
+
+        isDragging = false;
+    }
+
+    function setTranslate(xPos, yPos, el) {
+        el.style.transform = "translate3d(" + xPos + "px, " + yPos + "px, 0)";
+    }
+
+    // Funcionalidad de los botones
     closeButton.addEventListener('click', function() {
         if (confirm('¿Estás seguro de que quieres cerrar la terminal?')) {
             terminal.style.display = 'none';
@@ -19,6 +67,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     maximizeButton.addEventListener('click', function() {
         terminal.classList.toggle('maximized');
+        if (terminal.classList.contains('maximized')) {
+            terminal.style.transform = "none";
+            xOffset = 0;
+            yOffset = 0;
+        } else {
+            setTranslate(xOffset, yOffset, terminal);
+        }
     });
 
     const commands = {
