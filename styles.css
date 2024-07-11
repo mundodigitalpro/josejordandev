@@ -38,7 +38,7 @@ body {
 }
 
 .icon i {
-    height: 40px; /* Tamaño reducido de 50px a 40px */
+    font-size: 40px; /* Tamaño reducido de 48px a 40px */
     color: #fff;
     margin-bottom: 10px;
     background-color: rgba(255, 255, 255, 0.1);
