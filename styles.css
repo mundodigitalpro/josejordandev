@@ -9,11 +9,15 @@ body {
 }
 
 .terminal {
-    width: 600px;
+    width: 80%;
+    max-width: 800px;
+    height: 80vh;
     background-color: #1e1e1e;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0,0,0,0.5);
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .terminal-header {
@@ -38,6 +42,8 @@ body {
     color: #f0f0f0;
     font-size: 14px;
     line-height: 1.5;
+    overflow-y: auto;
+    flex-grow: 1;
 }
 
 .prompt {
@@ -52,4 +58,14 @@ body {
 @keyframes blink {
     from, to { opacity: 0; }
     50% { opacity: 1; }
+}
+
+.output {
+    margin-top: 10px;
+    white-space: pre-wrap;
+}
+
+.highlight {
+    color: #5af78e;
+    font-weight: bold;
 }
