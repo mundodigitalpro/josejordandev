@@ -76,9 +76,10 @@ body {
 .output {
     margin-top: 10px;
     white-space: pre-wrap;
+    line-height: 1.5;
 }
 
 .highlight {
-    color: #5af78e;
+    color: #50fa7b;
     font-weight: bold;
 }
