@@ -30,24 +30,15 @@ body {
     cursor: pointer;
     width: 100px;
     text-align: center;
-    transition: transform 0.3s;
 }
 
-.icon:hover {
-    transform: scale(1.1);
-}
-
-.icon img {
-    width: 40px; /* Tamaño uniforme */
-    height: 40px; /* Tamaño uniforme */
-    border-radius: 10px; /* Borde redondeado */
+.icon i {
+    font-size: 48px;
+    color: #fff;
+    margin-bottom: 10px;
     background-color: rgba(255, 255, 255, 0.1);
     padding: 15px;
-    transition: box-shadow 0.3s;
-}
-
-.icon img:hover {
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5); /* Sombra en hover */
+    border-radius: 10px;
 }
 
 .icon span {
@@ -55,7 +46,6 @@ body {
     font-size: 14px;
     word-wrap: break-word;
     text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
-    margin-top: 5px; /* Espacio entre el icono y el texto */
 }
 
 .terminal {
