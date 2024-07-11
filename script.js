@@ -1,7 +1,25 @@
 document.addEventListener('DOMContentLoaded', function() {
+    const terminal = document.querySelector('.terminal');
     const terminalWindow = document.getElementById('terminal-window');
+    const closeButton = document.getElementById('close-button');
+    const minimizeButton = document.getElementById('minimize-button');
+    const maximizeButton = document.getElementById('maximize-button');
     let currentCommand = '';
     let currentPrompt;
+
+    closeButton.addEventListener('click', function() {
+        if (confirm('¿Estás seguro de que quieres cerrar la terminal?')) {
+            terminal.style.display = 'none';
+        }
+    });
+
+    minimizeButton.addEventListener('click', function() {
+        terminal.classList.toggle('minimized');
+    });
+
+    maximizeButton.addEventListener('click', function() {
+        terminal.classList.toggle('maximized');
+    });
 
     const commands = {
         'help': 'Muestra esta lista de comandos',
