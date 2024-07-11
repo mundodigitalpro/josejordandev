@@ -18,6 +18,7 @@ body {
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    transition: all 0.3s;
 }
 
 .terminal-header {
@@ -31,6 +32,12 @@ body {
     width: 12px;
     height: 12px;
     border-radius: 50%;
+    cursor: pointer;
+    transition: opacity 0.3s;
+}
+
+.terminal-button:hover {
+    opacity: 0.8;
 }
 
 .red { background-color: #ff5f56; }
@@ -82,4 +89,18 @@ body {
 .highlight {
     color: #50fa7b;
     font-weight: bold;
+}
+
+.terminal.minimized {
+    height: 30px;
+    overflow: hidden;
+}
+
+.terminal.maximized {
+    width: 100%;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
 }
