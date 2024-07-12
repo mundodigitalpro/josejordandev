@@ -56,9 +56,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Funcionalidad de los botones
     closeButton.addEventListener('click', function() {
-        if (confirm('¿Estás seguro de que quieres cerrar la terminal?')) {
-            terminal.style.display = 'none';
-        }
+        terminal.style.display = 'none';
     });
 
     minimizeButton.addEventListener('click', function() {
@@ -217,6 +215,13 @@ Su enfoque se centra en crear soluciones eficientes y escalables para problemas 
                     break;
             }
         });
+    });
+
+    // Funcionalidad para abrir la terminal
+    const openTerminalIcon = document.getElementById('open-terminal');
+    openTerminalIcon.addEventListener('click', function() {
+        terminal.style.display = 'flex';
+        createNewPrompt();
     });
 
     window.addEventListener('load', function() {
