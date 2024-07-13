@@ -103,10 +103,10 @@ Su enfoque se centra en crear soluciones eficientes y escalables para problemas 
 3. API RESTful para una plataforma de e-learning (Django + PostgreSQL)
 4. Chatbot para atención al cliente (Python + NLP)`,
         'contact': `Puedes contactar a Jose Jordan a través de:
-• Email: jose.jordan@email.com
-• LinkedIn: linkedin.com/in/josejordan
-• GitHub: github.com/josejordan
-• Twitter: @josejordan_dev`
+• Email: info@josejordan.dev
+• LinkedIn: https://www.linkedin.com/in/josejordan1/
+• GitHub: github.com/mundodigitalpro
+• Twitter: @josejordandev`
     };
 
     const jokes = [
