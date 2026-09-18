@@ -1,11 +1,17 @@
 /*
- * Terminal interactiva de josejordan.dev.
+ * Terminal interactiva de josejordan.dev (español e inglés).
  * El contenido editable (textos, proyectos, enlaces) vive en content.js.
+ * El idioma lo marca el atributo lang del <html>: "es" en / y "en" en /en/.
  */
 (() => {
     'use strict';
 
     const site = typeof CONTENT !== 'undefined' ? CONTENT : {};
+    const LANG = document.documentElement.lang === 'en' ? 'en' : 'es';
+    const LOCALE = LANG === 'en' ? 'en-GB' : 'es-ES';
+    const OTHER_HOME = LANG === 'en' ? '/' : '/en/';
+    const text = (site.text && site.text[LANG]) || {};
+    const links = site.links || {};
     const $ = (id) => document.getElementById(id);
 
     const terminal = $('terminal');
@@ -19,10 +25,6 @@
 
     const mobileLayout = window.matchMedia('(max-width: 720px)');
     const touchLike = window.matchMedia('(hover: none) and (pointer: coarse)');
-    const links = site.links || {};
-
-    if (clock) startClock();
-    if (!terminal || !input) return;
 
     /* ---------- Construcción de nodos ---------- */
 
@@ -42,10 +44,10 @@
         }
     }
 
-    function link(href, text) {
+    function link(href, label) {
         const a = document.createElement('a');
         a.href = href;
-        a.textContent = text || href;
+        a.textContent = label || href;
         if (/^https?:/i.test(href)) {
             a.target = '_blank';
             a.rel = 'noopener noreferrer';
@@ -53,13 +55,172 @@
         return a;
     }
 
-    function kbd(text) {
-        return el('kbd', null, text);
+    function kbd(label) {
+        return el('kbd', null, label);
     }
 
     function shortUrl(url) {
         return url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
     }
+
+    function readPreference() {
+        try { return localStorage.getItem('lang'); } catch (error) { return null; }
+    }
+
+    function savePreference(lang) {
+        try { localStorage.setItem('lang', lang); } catch (error) { /* almacenamiento no disponible */ }
+    }
+
+    /* ---------- Textos de la interfaz ---------- */
+
+    const UI = {
+        es: {
+            desc: {
+                help: 'Lista los comandos disponibles',
+                about: 'Quién soy',
+                skills: 'Tecnologías con las que trabajo',
+                projects: 'Proyectos destacados en GitHub',
+                experience: 'Experiencia profesional',
+                education: 'Formación y certificaciones',
+                contact: 'Cómo contactar conmigo',
+                cv: 'Currículum',
+                open: 'Abre un enlace: open github | linkedin | email | cv | <nº de proyecto>',
+                lang: 'Cambia el idioma: lang en | lang es',
+                clear: 'Limpia la pantalla',
+                history: 'Muestra los últimos comandos',
+                date: 'Fecha y hora actual',
+                echo: 'Repite lo que escribas',
+                joke: 'Un chiste de programación',
+                quote: 'Una cita sobre programación',
+                whoami: 'Usuario actual',
+                hostname: 'Nombre del equipo',
+                pwd: 'Directorio actual',
+                ls: 'Lista los ficheros',
+                cat: 'Muestra un fichero',
+                sudo: 'Permisos de administrador',
+                exit: 'Cierra la terminal',
+                hola: 'Saludo'
+            },
+            helpHint: () => ['Truco: ', kbd('Tab'), ' completa un comando y ', kbd('↑'), ' recupera los anteriores.'],
+            projectsHint: () => ['Escribe ', kbd('open 1'), ' para abrir un proyecto o ', kbd('open github'), ' para ver todos los repositorios.'],
+            experienceHint: () => ['El detalle completo está en el CV: escribe ', kbd('cv'), '.'],
+            training: 'Formación',
+            certifications: 'Certificaciones',
+            cvOpening: 'Abriendo el CV en una pestaña nueva: ',
+            cvMissing: 'El CV en PDF no está publicado en la web.',
+            cvLinkedin: 'Mi trayectoria está al día en ',
+            cvEmailAnd: ' y puedes pedírmelo por email a ',
+            cvEmailOnly: 'Puedes pedírmelo por email a ',
+            opening: (label) => 'Abriendo ' + label + ' en una pestaña nueva: ',
+            openUnknown: (target) => 'open: no sé abrir «' + target + '».',
+            openUsage: () => ['Prueba con ', kbd('open github'), ', ', kbd('open linkedin'), ', ', kbd('open email'), ' o ', kbd('open 1'), ' (número de proyecto).'],
+            historyEmpty: 'Todavía no has escrito ningún comando.',
+            echoSuffix: ' (eco... eco... eco...)',
+            guest: 'invitado',
+            welcomeFile: 'bienvenida.txt',
+            welcomeHint: () => ['Escribe ', kbd('help'), ' para ver los comandos.'],
+            catMissing: (name, list) => 'cat: ' + name + ': no existe el fichero. Prueba con ' + list + '.',
+            catNone: '(ninguno)',
+            sudo: 'invitado no está en el fichero sudoers. Este incidente será reportado.',
+            greeting: () => ['¡Hola! Encantado de verte por aquí. Escribe ', kbd('help'), ' para empezar.'],
+            notFound: (name) => 'bash: ' + name + ': comando no encontrado',
+            didYouMean: (alternative) => ['¿Quisiste decir ', kbd(alternative), '?'],
+            seeHelp: () => ['Escribe ', kbd('help'), ' para ver los comandos disponibles.'],
+            langCurrent: () => ['Idioma actual: español. Escribe ', kbd('lang en'), ' para cambiar a inglés.'],
+            langSame: 'Ya estás en la versión en español.',
+            langSwitching: 'Cambiando a inglés…',
+            otherLanguage: () => ['This site is also available in ', link('/en/', 'English'), '.'],
+            restoreLabel: 'Restaurar tamaño de la terminal',
+            maximizeLabel: 'Maximizar terminal',
+            restore: 'Restaurar',
+            maximize: 'Maximizar'
+        },
+        en: {
+            desc: {
+                help: 'List the available commands',
+                about: 'Who I am',
+                skills: 'Technologies I work with',
+                projects: 'Featured projects on GitHub',
+                experience: 'Work experience',
+                education: 'Education and certifications',
+                contact: 'How to reach me',
+                cv: 'Résumé (CV)',
+                open: 'Open a link: open github | linkedin | email | cv | <project number>',
+                lang: 'Switch language: lang en | lang es',
+                clear: 'Clear the screen',
+                history: 'Show recent commands',
+                date: 'Current date and time',
+                echo: 'Repeat what you type',
+                joke: 'A programming joke',
+                quote: 'A quote about programming',
+                whoami: 'Current user',
+                hostname: 'Host name',
+                pwd: 'Current directory',
+                ls: 'List files',
+                cat: 'Show a file',
+                sudo: 'Administrator rights',
+                exit: 'Close the terminal',
+                hola: 'Greeting'
+            },
+            helpHint: () => ['Tip: ', kbd('Tab'), ' completes a command and ', kbd('↑'), ' brings back previous ones.'],
+            projectsHint: () => ['Type ', kbd('open 1'), ' to open a project or ', kbd('open github'), ' to see all repositories.'],
+            experienceHint: () => ['The full details are in the CV: type ', kbd('cv'), '.'],
+            training: 'Education',
+            certifications: 'Certifications',
+            cvOpening: 'Opening the CV in a new tab: ',
+            cvOpeningSpanish: 'Opening the CV (in Spanish) in a new tab: ',
+            cvMissing: 'The CV is not published on this site yet.',
+            cvLinkedin: 'My career history is up to date on ',
+            cvEmailAnd: ' and you can request it by email at ',
+            cvEmailOnly: 'You can request it by email at ',
+            opening: (label) => 'Opening ' + label + ' in a new tab: ',
+            openUnknown: (target) => "open: I don't know how to open “" + target + '”.',
+            openUsage: () => ['Try ', kbd('open github'), ', ', kbd('open linkedin'), ', ', kbd('open email'), ' or ', kbd('open 1'), ' (project number).'],
+            historyEmpty: 'You have not typed any commands yet.',
+            echoSuffix: ' (echo... echo... echo...)',
+            guest: 'guest',
+            welcomeFile: 'welcome.txt',
+            welcomeHint: () => ['Type ', kbd('help'), ' to see the commands.'],
+            catMissing: (name, list) => 'cat: ' + name + ': no such file. Try ' + list + '.',
+            catNone: '(none)',
+            sudo: 'guest is not in the sudoers file. This incident will be reported.',
+            greeting: () => ['Hi! Nice to see you here. Type ', kbd('help'), ' to get started.'],
+            notFound: (name) => 'bash: ' + name + ': command not found',
+            didYouMean: (alternative) => ['Did you mean ', kbd(alternative), '?'],
+            seeHelp: () => ['Type ', kbd('help'), ' to see the available commands.'],
+            langCurrent: () => ['Current language: English. Type ', kbd('lang es'), ' to switch to Spanish.'],
+            langSame: 'You are already reading the English version.',
+            langSwitching: 'Switching to Spanish…',
+            otherLanguage: () => ['Este sitio también está disponible en ', link('/', 'español'), '.'],
+            restoreLabel: 'Restore terminal size',
+            maximizeLabel: 'Maximize terminal',
+            restore: 'Restore',
+            maximize: 'Maximize'
+        }
+    };
+
+    const T = UI[LANG];
+
+    /* ---------- Idioma: selector y aviso ---------- */
+
+    document.querySelectorAll('.lang-switch a[hreflang]').forEach((anchor) => {
+        anchor.addEventListener('click', () => savePreference(anchor.getAttribute('hreflang')));
+    });
+
+    const langHint = $('lang-hint');
+    if (langHint) {
+        const codes = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || ''];
+        const detected = codes.reduce((found, code) => found || (/^es/i.test(code) ? 'es' : /^en/i.test(code) ? 'en' : ''), '') || 'en';
+        if (detected !== LANG && readPreference() !== LANG) {
+            langHint.replaceChildren(...T.otherLanguage());
+            langHint.hidden = false;
+        }
+    }
+
+    if (clock) startClock();
+    if (!terminal || !input) return;
+
+    /* ---------- Salida ---------- */
 
     function createOutput() {
         const box = el('div', 'output');
@@ -74,8 +235,8 @@
         return api;
     }
 
-    function echoCommand(text) {
-        output.append(el('p', 'line', [el('span', 'prompt', '$'), ' ', el('span', 'cmd', text)]));
+    function echoCommand(value) {
+        output.append(el('p', 'line', [el('span', 'prompt', '$'), ' ', el('span', 'cmd', value)]));
     }
 
     function scrollToEnd() {
@@ -90,6 +251,12 @@
         window.open(url, '_blank', 'noopener');
     }
 
+    /* Las rutas relativas de content.js se resuelven contra la raíz del sitio, también desde /en/ */
+    const siteUrl = (url) => (!url || /^(?:[a-z][a-z0-9+.-]*:|\/)/i.test(url) ? url : '/' + url);
+    const cvUrl = siteUrl(LANG === 'en' && site.cvUrlEn ? site.cvUrlEn : site.cvUrl);
+    const cvInSpanish = LANG === 'en' && !site.cvUrlEn;
+    const cvFile = cvUrl ? cvUrl.split('/').pop() : '';
+
     /* ---------- Comandos ---------- */
 
     const commands = new Map();
@@ -97,62 +264,63 @@
     let historyIndex = 0;
     let draft = '';
 
-    function define(name, description, run, options) {
-        commands.set(name, { name, description, run, hidden: Boolean(options && options.hidden) });
+    function define(name, run, options) {
+        commands.set(name, { name, description: T.desc[name] || (options && options.description) || '', run, hidden: Boolean(options && options.hidden) });
     }
 
-    define('help', 'Lista los comandos disponibles', (out) => {
+    define('help', (out) => {
         const rows = el('div', 'rows');
         commands.forEach((cmd) => {
             if (!cmd.hidden) rows.append(el('span', 'key', cmd.name), el('span', null, cmd.description));
         });
         out.node(rows);
-        out.muted(['Truco: ', kbd('Tab'), ' completa un comando y ', kbd('↑'), ' recupera los anteriores.']);
+        out.muted(T.helpHint());
     });
 
-    define('about', 'Quién soy', (out) => {
-        (site.about || []).forEach((paragraph) => out.line(paragraph));
+    define('about', (out) => {
+        (text.about || []).forEach((paragraph) => out.line(paragraph));
     });
 
-    define('skills', 'Tecnologías con las que trabajo', (out) => {
+    define('skills', (out) => {
         const rows = el('div', 'rows');
-        (site.skills || []).forEach((group) => {
+        (text.skills || []).forEach((group) => {
             rows.append(el('span', 'key', group.area), el('span', null, group.items.join(', ')));
         });
         out.node(rows);
     });
 
-    define('projects', 'Proyectos destacados en GitHub', (out) => {
+    define('projects', (out) => {
         const list = el('ol', 'projects');
         (site.projects || []).forEach((project) => {
-            list.append(el('li', null, [link(project.url, project.name), el('span', 'tag', project.lang), el('br'), project.desc]));
+            const desc = typeof project.desc === 'string' ? project.desc : (project.desc[LANG] || project.desc.es || '');
+            list.append(el('li', null, [link(project.url, project.name), el('span', 'tag', project.lang), el('br'), desc]));
         });
         out.node(list);
-        out.muted(['Escribe ', kbd('open 1'), ' para abrir un proyecto o ', kbd('open github'), ' para ver todos los repositorios.']);
+        out.muted(T.projectsHint());
     });
 
-    define('experience', 'Experiencia profesional', (out) => {
+    define('experience', (out) => {
         const rows = el('div', 'rows spaced');
-        (site.experience || []).forEach((job) => {
+        (text.experience || []).forEach((job) => {
             const title = [el('strong', null, job.role)];
             if (job.place) title.push(' ', el('span', 'tag', job.place));
             rows.append(el('span', 'key', job.period), el('span', null, [...title, el('br'), job.desc]));
         });
         out.node(rows);
-        out.muted(['El detalle completo está en el CV: escribe ', kbd('cv'), '.']);
+        out.muted(T.experienceHint());
     });
 
-    define('education', 'Formación y certificaciones', (out) => {
+    define('education', (out) => {
         const rows = el('div', 'rows spaced');
-        const lines = (items) => items.flatMap((text, i) => (i ? [el('br'), text] : [text]));
-        if ((site.education || []).length) rows.append(el('span', 'key', 'Formación'), el('span', null, lines(site.education)));
-        if ((site.certifications || []).length) rows.append(el('span', 'key', 'Certificaciones'), el('span', null, lines(site.certifications)));
+        const lines = (items) => items.flatMap((item, i) => (i ? [el('br'), item] : [item]));
+        if ((text.education || []).length) rows.append(el('span', 'key', T.training), el('span', null, lines(text.education)));
+        if ((text.certifications || []).length) rows.append(el('span', 'key', T.certifications), el('span', null, lines(text.certifications)));
         out.node(rows);
     });
 
-    define('contact', 'Cómo contactar conmigo', (out) => {
+    define('contact', (out) => {
         const rows = el('div', 'rows');
-        const add = (key, href, text) => rows.append(el('span', 'key', key), el('span', null, link(href, text)));
+        const add = (key, href, label) => rows.append(el('span', 'key', key), el('span', null, link(href, label)));
         if (links.email) add('Email', 'mailto:' + links.email, links.email);
         if (links.linkedin) add('LinkedIn', links.linkedin, shortUrl(links.linkedin));
         if (links.github) add('GitHub', links.github, shortUrl(links.github));
@@ -160,20 +328,20 @@
         out.node(rows);
     });
 
-    define('cv', 'Currículum', (out) => {
-        if (site.cvUrl) {
-            out.line(['Abriendo el CV en una pestaña nueva: ', link(site.cvUrl, site.cvUrl)]);
-            openUrl(site.cvUrl);
+    define('cv', (out) => {
+        if (cvUrl) {
+            out.line([cvInSpanish && T.cvOpeningSpanish ? T.cvOpeningSpanish : T.cvOpening, link(cvUrl, cvFile)]);
+            openUrl(cvUrl);
             return;
         }
-        out.line('El CV en PDF no está publicado en la web.');
+        out.line(T.cvMissing);
         const alternatives = [];
-        if (links.linkedin) alternatives.push('Mi trayectoria está al día en ', link(links.linkedin, 'LinkedIn'));
-        if (links.email) alternatives.push(alternatives.length ? ' y puedes pedírmelo por email a ' : 'Puedes pedírmelo por email a ', link('mailto:' + links.email, links.email));
+        if (links.linkedin) alternatives.push(T.cvLinkedin, link(links.linkedin, 'LinkedIn'));
+        if (links.email) alternatives.push(alternatives.length ? T.cvEmailAnd : T.cvEmailOnly, link('mailto:' + links.email, links.email));
         if (alternatives.length) out.line([...alternatives, '.']);
     });
 
-    define('open', 'Abre un enlace: open github | linkedin | email | cv | <nº de proyecto>', (out, args) => {
+    define('open', (out, args) => {
         const target = (args[0] || '').toLowerCase();
         const projects = site.projects || [];
         const known = {
@@ -183,7 +351,7 @@
             x: links.twitter,
             email: links.email ? 'mailto:' + links.email : '',
             mail: links.email ? 'mailto:' + links.email : '',
-            cv: site.cvUrl
+            cv: cvUrl
         };
         let url = known[target];
         let label = target;
@@ -195,85 +363,100 @@
             }
         }
         if (!url) {
-            out.error('open: no sé abrir «' + (args[0] || '') + '».');
-            out.muted(['Prueba con ', kbd('open github'), ', ', kbd('open linkedin'), ', ', kbd('open email'), ' o ', kbd('open 1'), ' (número de proyecto).']);
+            out.error(T.openUnknown(args[0] || ''));
+            out.muted(T.openUsage());
             return;
         }
-        out.line(['Abriendo ' + label + ' en una pestaña nueva: ', link(url, url.replace(/^mailto:/, ''))]);
+        out.line([T.opening(label), link(url, url.replace(/^mailto:/, ''))]);
         openUrl(url);
     });
 
-    define('clear', 'Limpia la pantalla', () => {
+    define('lang', (out, args) => {
+        const target = (args[0] || '').toLowerCase();
+        if (target === 'en' || target === 'es') {
+            if (target === LANG) {
+                out.line(T.langSame);
+                return;
+            }
+            savePreference(target);
+            out.line(T.langSwitching);
+            setTimeout(() => location.assign(OTHER_HOME), 250);
+            return;
+        }
+        out.line(T.langCurrent());
+    });
+
+    define('clear', () => {
         output.replaceChildren();
     });
 
-    define('history', 'Muestra los últimos comandos', (out) => {
+    define('history', (out) => {
         const recent = history.slice(-20);
         if (!recent.length) {
-            out.muted('Todavía no has escrito ningún comando.');
+            out.muted(T.historyEmpty);
             return;
         }
         const start = history.length - recent.length + 1;
         recent.forEach((entry, i) => out.line(String(start + i).padStart(4) + '  ' + entry));
     });
 
-    define('date', 'Fecha y hora actual', (out) => {
-        out.line(new Intl.DateTimeFormat('es-ES', { dateStyle: 'full', timeStyle: 'medium' }).format(new Date()));
+    define('date', (out) => {
+        out.line(new Intl.DateTimeFormat(LOCALE, { dateStyle: 'full', timeStyle: 'medium' }).format(new Date()));
     });
 
-    define('echo', 'Repite lo que escribas', (out, args, argText) => {
+    define('echo', (out, args, argText) => {
         if (!argText) {
             out.line('');
             return;
         }
-        out.line([argText, el('span', 'muted', ' (eco... eco... eco...)')]);
+        out.line([argText, el('span', 'muted', T.echoSuffix)]);
     });
 
-    define('joke', 'Un chiste de programación', (out) => out.line(pick(site.jokes)));
+    define('joke', (out) => out.line(pick(text.jokes)));
 
-    define('quote', 'Una cita sobre programación', (out) => out.line(pick(site.quotes)));
+    define('quote', (out) => out.line(pick(text.quotes)));
 
     /* Pequeños guiños que no aparecen en help */
 
-    define('whoami', 'Usuario actual', (out) => out.line('invitado'), { hidden: true });
-    define('hostname', 'Nombre del equipo', (out) => out.line(site.host || location.hostname), { hidden: true });
-    define('pwd', 'Directorio actual', (out) => out.line('/home/' + (site.user || 'jose')), { hidden: true });
+    define('whoami', (out) => out.line(T.guest), { hidden: true });
+    define('hostname', (out) => out.line(site.host || location.hostname), { hidden: true });
+    define('pwd', (out) => out.line('/home/' + (site.user || 'jose')), { hidden: true });
 
-    const files = { 'about.txt': 'about', 'skills.txt': 'skills', 'projects.md': 'projects', 'contact.txt': 'contact', 'bienvenida.txt': null };
-    const cvFile = site.cvUrl ? site.cvUrl.split('/').pop() : '';
+    const files = { 'about.txt': 'about', 'skills.txt': 'skills', 'projects.md': 'projects', 'experience.txt': 'experience', 'education.txt': 'education', 'contact.txt': 'contact' };
+    files[T.welcomeFile] = null;
 
-    define('ls', 'Lista los ficheros', (out) => {
+    define('ls', (out) => {
         const names = Object.keys(files);
         if (cvFile) names.push(cvFile);
         out.line(names.join('  '));
     }, { hidden: true });
 
-    define('cat', 'Muestra un fichero', (out, args) => {
+    define('cat', (out, args) => {
         const name = args[0] || '';
         if (cvFile && (name === cvFile || name === 'cv.pdf')) return commands.get('cv').run(out, [], '');
-        if (name === 'bienvenida.txt') {
-            out.line((site.about || [])[0] || site.name || '');
-            out.muted(['Escribe ', kbd('help'), ' para ver los comandos.']);
+        if (name === T.welcomeFile) {
+            out.line((text.about || [])[0] || site.name || '');
+            out.muted(T.welcomeHint());
             return;
         }
         const command = files[name];
         if (command) return commands.get(command).run(out, [], '');
-        out.error('cat: ' + (name || '(ninguno)') + ': no existe el fichero. Prueba con ' + Object.keys(files).join(', ') + '.');
+        out.error(T.catMissing(name || T.catNone, Object.keys(files).join(', ')));
     }, { hidden: true });
 
-    define('sudo', 'Permisos de administrador', (out) => {
-        out.error('invitado no está en el fichero sudoers. Este incidente será reportado.');
-    }, { hidden: true });
+    define('sudo', (out) => out.error(T.sudo), { hidden: true });
+    define('exit', () => closeTerminal(), { hidden: true });
+    define('hola', (out) => out.line(T.greeting()), { hidden: true });
+    define('hello', (out) => out.line(T.greeting()), { hidden: true, description: T.desc.hola });
 
-    define('exit', 'Cierra la terminal', () => closeTerminal(), { hidden: true });
-    define('hola', 'Saludo', (out) => out.line(['¡Hola! Encantado de verte por aquí. Escribe ', kbd('help'), ' para empezar.']), { hidden: true });
-    define('hello', 'Saludo', (out) => commands.get('hola').run(out, [], ''), { hidden: true });
-
-    /* Alias en español (ocultos en help) */
-    const aliases = { ayuda: 'help', habilidades: 'skills', proyectos: 'projects', experiencia: 'experience', formacion: 'education', 'formación': 'education', contacto: 'contact', limpiar: 'clear', fecha: 'date', salir: 'exit' };
-    Object.entries(aliases).forEach(([name, target]) => {
-        const command = commands.get(target);
-        define(name, command.description, (out, args, argText) => command.run(out, args, argText), { hidden: true });
+    /* Alias ocultos (español y algunos en inglés) */
+    const aliases = {
+        ayuda: 'help', habilidades: 'skills', proyectos: 'projects', experiencia: 'experience', formacion: 'education', 'formación': 'education',
+        contacto: 'contact', idioma: 'lang', limpiar: 'clear', fecha: 'date', salir: 'exit', language: 'lang', resume: 'cv'
+    };
+    Object.entries(aliases).forEach(([name, targetName]) => {
+        const command = commands.get(targetName);
+        define(name, (out, args, argText) => command.run(out, args, argText), { hidden: true, description: command.description });
     });
 
     /* ---------- Ejecución ---------- */
@@ -306,27 +489,25 @@
     }
 
     function run(raw) {
-        const text = raw.trim();
-        echoCommand(text);
+        const value = raw.trim();
+        echoCommand(value);
         input.value = '';
         draft = '';
-        if (text) {
-            if (history[history.length - 1] !== text) history.push(text);
+        if (value) {
+            if (history[history.length - 1] !== value) history.push(value);
             historyIndex = history.length;
-            const parts = text.split(/\s+/);
+            const parts = value.split(/\s+/);
             const name = parts[0].toLowerCase();
             const args = parts.slice(1);
-            const argText = text.slice(parts[0].length).trim();
+            const argText = value.slice(parts[0].length).trim();
             const command = commands.get(name);
             const out = createOutput();
             if (command) {
                 command.run(out, args, argText);
             } else {
-                out.error('bash: ' + parts[0] + ': comando no encontrado');
+                out.error(T.notFound(parts[0]));
                 const alternative = suggest(name);
-                out.muted(alternative
-                    ? ['¿Quisiste decir ', kbd(alternative), '?']
-                    : ['Escribe ', kbd('help'), ' para ver los comandos disponibles.']);
+                out.muted(alternative ? T.didYouMean(alternative) : T.seeHelp());
             }
         }
         scrollToEnd();
@@ -439,8 +620,8 @@
     function toggleMaximize() {
         terminal.classList.remove('minimized');
         terminal.classList.toggle('maximized');
-        maximizeButton.setAttribute('aria-label', isMaximized() ? 'Restaurar tamaño de la terminal' : 'Maximizar terminal');
-        maximizeButton.title = isMaximized() ? 'Restaurar' : 'Maximizar';
+        maximizeButton.setAttribute('aria-label', isMaximized() ? T.restoreLabel : T.maximizeLabel);
+        maximizeButton.title = isMaximized() ? T.restore : T.maximize;
         scrollToEnd();
     }
 
@@ -475,14 +656,13 @@
         if (event.button !== 0 || event.target.closest('button') || isMaximized() || mobileLayout.matches) return;
         positionExplicitly();
         const rect = terminal.getBoundingClientRect();
-        drag = { id: event.pointerId, dx: event.clientX - rect.left, dy: event.clientY - rect.top, width: rect.width, moved: false };
+        drag = { id: event.pointerId, dx: event.clientX - rect.left, dy: event.clientY - rect.top, width: rect.width };
         header.setPointerCapture(event.pointerId);
         terminal.classList.add('is-dragging');
     });
 
     header.addEventListener('pointermove', (event) => {
         if (!drag || event.pointerId !== drag.id) return;
-        drag.moved = true;
         terminal.style.left = clamp(event.clientX - drag.dx, 160 - drag.width, window.innerWidth - 160) + 'px';
         terminal.style.top = clamp(event.clientY - drag.dy, menubarHeight(), window.innerHeight - 44) + 'px';
     });
@@ -518,7 +698,7 @@
     /* ---------- Reloj ---------- */
 
     function startClock() {
-        const format = new Intl.DateTimeFormat('es-ES', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+        const format = new Intl.DateTimeFormat(LOCALE, { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
         const tick = () => {
             const now = new Date();
             clock.textContent = format.format(now);

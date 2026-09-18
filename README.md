@@ -1,14 +1,15 @@
 # josejordan.dev
 
-Portfolio personal de Jose Jordan: un escritorio simulado con una terminal interactiva.
+Portfolio personal de Jose Jordan: un escritorio simulado con una terminal interactiva, en español (`/`) e inglés (`/en/`).
 Sitio estático (HTML, CSS y JavaScript sin dependencias ni proceso de build) alojado en Cloudflare.
 
 ## Estructura
 
 | Fichero | Para qué sirve |
 | --- | --- |
-| `index.html` | Escritorio, iconos y ventana de terminal |
-| `content.js` | Textos, habilidades, proyectos y enlaces. **Edita este fichero para actualizar el contenido.** |
+| `index.html`, `en/index.html` | Escritorio, iconos y ventana de terminal en español e inglés (misma estructura, solo cambia el texto) |
+| `lang.js` | Detecta el idioma del navegador o la preferencia guardada y abre la versión adecuada |
+| `content.js` | Textos en `text.es` y `text.en`, proyectos y enlaces. **Edita este fichero para actualizar el contenido.** |
 | `script.js` | Lógica de la terminal (comandos, historial, autocompletado, ventana arrastrable) |
 | `styles.css` | Estilos del escritorio y la terminal |
 | `cv-jose-jordan.pdf` | CV que abren el comando `cv` y el icono CV |
@@ -20,7 +21,7 @@ Sitio estático (HTML, CSS y JavaScript sin dependencias ni proceso de build) al
 
 ## Desarrollo local
 
-Cualquier servidor estático vale:
+Las páginas usan rutas absolutas (`/styles.css`), así que hace falta un servidor local:
 
 ```bash
 python3 -m http.server 8000
@@ -43,5 +44,6 @@ npx wrangler dev              # como Cloudflare Worker
 Los comandos de la terminal leen de `content.js`:
 
 - `about`, `skills`, `projects` y `contact` muestran lo que hay en ese fichero.
-- `cv` abre el PDF indicado en `cvUrl` si existe; si está vacío, remite a LinkedIn y al email.
+- `cv` abre el PDF indicado en `cvUrl` (o `cvUrlEn` en la versión inglesa, si existe); si está vacío, remite a LinkedIn y al email.
+- `lang en` y `lang es` cambian de idioma y guardan la elección; el selector ES/EN de la barra superior hace lo mismo.
 - `open <n>` abre el proyecto número `n` de la lista.
