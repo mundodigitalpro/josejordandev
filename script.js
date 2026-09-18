@@ -1,7 +1,8 @@
 /*
- * Terminal interactiva de josejordan.dev (español e inglés).
+ * Escritorio y terminal interactiva de josejordan.dev (español e inglés).
  * El contenido editable (textos, proyectos, enlaces) vive en content.js.
  * El idioma lo marca el atributo lang del <html>: "es" en / y "en" en /en/.
+ * El Buscaminas vive en minesweeper.js y se abre en su propia ventana.
  */
 (() => {
     'use strict';
@@ -15,7 +16,6 @@
     const $ = (id) => document.getElementById(id);
 
     const terminal = $('terminal');
-    const header = $('terminal-header');
     const body = $('terminal-body');
     const output = $('terminal-output');
     const form = $('input-form');
@@ -63,12 +63,12 @@
         return url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
     }
 
-    function readPreference() {
-        try { return localStorage.getItem('lang'); } catch (error) { return null; }
+    function readStorage(key) {
+        try { return localStorage.getItem(key); } catch (error) { return null; }
     }
 
-    function savePreference(lang) {
-        try { localStorage.setItem('lang', lang); } catch (error) { /* almacenamiento no disponible */ }
+    function writeStorage(key, value) {
+        try { localStorage.setItem(key, value); } catch (error) { /* almacenamiento no disponible */ }
     }
 
     /* ---------- Textos de la interfaz ---------- */
@@ -86,6 +86,8 @@
                 cv: 'Currículum',
                 open: 'Abre un enlace: open github | linkedin | email | cv | <nº de proyecto>',
                 lang: 'Cambia el idioma: lang en | lang es',
+                minesweeper: 'Abre el Buscaminas en su ventana',
+                guess: 'Juego: adivina el número del 1 al 100',
                 clear: 'Limpia la pantalla',
                 history: 'Muestra los últimos comandos',
                 date: 'Fecha y hora actual',
@@ -130,6 +132,15 @@
             langSame: 'Ya estás en la versión en español.',
             langSwitching: 'Cambiando a inglés…',
             otherLanguage: () => ['This site is also available in ', link('/en/', 'English'), '.'],
+            minesweeperOpened: 'Buscaminas abierto en su propia ventana. La terminal sigue disponible desde el dock.',
+            guessIntro: () => ['He pensado un número entre 1 y 100. Escribe tu intento, o ', kbd('salir'), ' para dejarlo.'],
+            guessInvalid: 'Escribe un número entero entre 1 y 100.',
+            guessHigher: 'Más alto.',
+            guessLower: 'Más bajo.',
+            guessWin: (n) => '¡Correcto! Lo has adivinado en ' + n + (n === 1 ? ' intento.' : ' intentos.'),
+            guessRecord: ' Nuevo récord.',
+            guessBest: (n) => 'Tu mejor marca: ' + n + (n === 1 ? ' intento.' : ' intentos.'),
+            guessQuit: (secret) => 'Partida abandonada. El número era ' + secret + '.',
             restoreLabel: 'Restaurar tamaño de la terminal',
             maximizeLabel: 'Maximizar terminal',
             restore: 'Restaurar',
@@ -147,6 +158,8 @@
                 cv: 'Résumé (CV)',
                 open: 'Open a link: open github | linkedin | email | cv | <project number>',
                 lang: 'Switch language: lang en | lang es',
+                minesweeper: 'Open Minesweeper in its own window',
+                guess: 'Game: guess the number from 1 to 100',
                 clear: 'Clear the screen',
                 history: 'Show recent commands',
                 date: 'Current date and time',
@@ -192,6 +205,15 @@
             langSame: 'You are already reading the English version.',
             langSwitching: 'Switching to Spanish…',
             otherLanguage: () => ['Este sitio también está disponible en ', link('/', 'español'), '.'],
+            minesweeperOpened: 'Minesweeper is open in its own window. The terminal stays available from the dock.',
+            guessIntro: () => ['I am thinking of a number between 1 and 100. Type your guess, or ', kbd('exit'), ' to give up.'],
+            guessInvalid: 'Type a whole number between 1 and 100.',
+            guessHigher: 'Higher.',
+            guessLower: 'Lower.',
+            guessWin: (n) => 'Correct! You got it in ' + n + (n === 1 ? ' try.' : ' tries.'),
+            guessRecord: ' New record.',
+            guessBest: (n) => 'Your best: ' + n + (n === 1 ? ' try.' : ' tries.'),
+            guessQuit: (secret) => 'Game over. The number was ' + secret + '.',
             restoreLabel: 'Restore terminal size',
             maximizeLabel: 'Maximize terminal',
             restore: 'Restore',
@@ -204,14 +226,14 @@
     /* ---------- Idioma: selector y aviso ---------- */
 
     document.querySelectorAll('.lang-switch a[hreflang]').forEach((anchor) => {
-        anchor.addEventListener('click', () => savePreference(anchor.getAttribute('hreflang')));
+        anchor.addEventListener('click', () => writeStorage('lang', anchor.getAttribute('hreflang')));
     });
 
     const langHint = $('lang-hint');
     if (langHint) {
         const codes = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || ''];
         const detected = codes.reduce((found, code) => found || (/^es/i.test(code) ? 'es' : /^en/i.test(code) ? 'en' : ''), '') || 'en';
-        if (detected !== LANG && readPreference() !== LANG) {
+        if (detected !== LANG && readStorage('lang') !== LANG) {
             langHint.replaceChildren(...T.otherLanguage());
             langHint.hidden = false;
         }
@@ -220,7 +242,198 @@
     if (clock) startClock();
     if (!terminal || !input) return;
 
+    /* ---------- Gestor de ventanas ---------- */
+
+    const windows = new Map();
+    const dockItems = new Map();
+    let zTop = 10;
+    let activeWindow = null;
+
+    const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+    const menubarHeight = () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--menubar-h')) || 0;
+
+    function registerWindow(id, hooks) {
+        const element = $(id);
+        if (!element) return null;
+        const win = { id, el: element, header: element.querySelector('.window-header'), hooks: hooks || {}, drag: null };
+        windows.set(id, win);
+
+        element.querySelectorAll('[data-action]').forEach((button) => {
+            button.addEventListener('click', () => {
+                const action = button.dataset.action;
+                if (action === 'close') closeWindow(win);
+                else if (action === 'minimize') minimizeWindow(win);
+                else if (action === 'maximize') toggleMaximize(win);
+            });
+        });
+
+        element.addEventListener('pointerdown', () => focusWindow(win));
+
+        if (win.header) {
+            win.header.addEventListener('pointerdown', (event) => startDrag(win, event));
+            win.header.addEventListener('pointermove', (event) => moveDrag(win, event));
+            win.header.addEventListener('pointerup', (event) => endDrag(win, event));
+            win.header.addEventListener('pointercancel', (event) => endDrag(win, event));
+            win.header.addEventListener('dblclick', (event) => {
+                if (event.target.closest('button') || mobileLayout.matches) return;
+                if (element.querySelector('[data-action="maximize"]')) toggleMaximize(win);
+            });
+        }
+        return win;
+    }
+
+    const isClosed = (win) => win.el.classList.contains('is-closed');
+    const isMinimized = (win) => win.el.classList.contains('minimized');
+    const isMaximized = (win) => win.el.classList.contains('maximized');
+    const isVisible = (win) => !isClosed(win) && !isMinimized(win);
+
+    function openWindow(win) {
+        const wasHidden = !isVisible(win);
+        win.el.classList.remove('is-closed', 'minimized');
+        focusWindow(win, true);
+        if (wasHidden && win.hooks.onShow) win.hooks.onShow();
+        renderDock();
+    }
+
+    function closeWindow(win) {
+        win.el.classList.add('is-closed');
+        if (win.hooks.onClose) win.hooks.onClose();
+        if (activeWindow === win) activeWindow = null;
+        renderDock();
+    }
+
+    function minimizeWindow(win) {
+        win.el.classList.add('minimized');
+        if (win.hooks.onHide) win.hooks.onHide();
+        if (activeWindow === win) activeWindow = null;
+        renderDock();
+    }
+
+    function focusWindow(win, force) {
+        if (activeWindow === win && !force) return;
+        windows.forEach((other) => other.el.classList.toggle('is-active', other === win));
+        win.el.style.zIndex = String(++zTop);
+        activeWindow = win;
+        renderDock();
+    }
+
+    function toggleMaximize(win) {
+        win.el.classList.remove('minimized');
+        win.el.classList.toggle('maximized');
+        const button = win.el.querySelector('[data-action="maximize"]');
+        if (button) {
+            button.setAttribute('aria-label', isMaximized(win) ? T.restoreLabel : T.maximizeLabel);
+            button.title = isMaximized(win) ? T.restore : T.maximize;
+        }
+        if (win.hooks.onShow) win.hooks.onShow();
+    }
+
+    function positionExplicitly(win) {
+        if (win.el.classList.contains('is-positioned')) return;
+        const rect = win.el.getBoundingClientRect();
+        win.el.style.left = rect.left + 'px';
+        win.el.style.top = rect.top + 'px';
+        win.el.classList.add('is-positioned');
+    }
+
+    function startDrag(win, event) {
+        if (event.button !== 0 || event.target.closest('button, select, a') || isMaximized(win) || mobileLayout.matches) return;
+        positionExplicitly(win);
+        const rect = win.el.getBoundingClientRect();
+        win.drag = { id: event.pointerId, dx: event.clientX - rect.left, dy: event.clientY - rect.top, width: rect.width };
+        win.header.setPointerCapture(event.pointerId);
+        win.el.classList.add('is-dragging');
+    }
+
+    function moveDrag(win, event) {
+        if (!win.drag || event.pointerId !== win.drag.id) return;
+        win.el.style.left = clamp(event.clientX - win.drag.dx, 160 - win.drag.width, window.innerWidth - 160) + 'px';
+        win.el.style.top = clamp(event.clientY - win.drag.dy, menubarHeight(), window.innerHeight - 44) + 'px';
+    }
+
+    function endDrag(win, event) {
+        if (!win.drag || event.pointerId !== win.drag.id) return;
+        win.drag = null;
+        win.el.classList.remove('is-dragging');
+    }
+
+    function keepInViewport() {
+        windows.forEach((win) => {
+            if (!win.el.classList.contains('is-positioned') || isMaximized(win) || mobileLayout.matches) return;
+            const rect = win.el.getBoundingClientRect();
+            win.el.style.left = clamp(rect.left, 160 - rect.width, window.innerWidth - 160) + 'px';
+            win.el.style.top = clamp(rect.top, menubarHeight(), window.innerHeight - 44) + 'px';
+        });
+    }
+
+    window.addEventListener('resize', keepInViewport);
+
+    /* Dock: lanzadores con indicador de apps abiertas */
+
+    document.querySelectorAll('.dock-item[data-window]').forEach((button) => {
+        dockItems.set(button.dataset.window, button);
+        button.addEventListener('click', () => {
+            const win = windows.get(button.dataset.window);
+            if (!win) return;
+            if (isVisible(win) && activeWindow !== win) focusWindow(win);
+            else openWindow(win);
+        });
+    });
+
+    function renderDock() {
+        dockItems.forEach((button, id) => {
+            const win = windows.get(id);
+            const running = Boolean(win) && !isClosed(win);
+            button.classList.toggle('is-running', running);
+            button.classList.toggle('is-minimized', running && isMinimized(win));
+            button.classList.toggle('is-active', Boolean(win) && win === activeWindow);
+            button.setAttribute('aria-pressed', String(Boolean(win) && win === activeWindow));
+        });
+    }
+
+    /* ---------- Ventanas: terminal y Buscaminas ---------- */
+
+    const terminalWindow = registerWindow('terminal', {
+        onShow: () => {
+            if (desktopNote) desktopNote.hidden = true;
+            scrollToEnd();
+        },
+        onClose: () => {
+            input.blur();
+            if (desktopNote) desktopNote.hidden = false;
+        }
+    });
+
+    let minesweeperGame = null;
+    const minesweeperWindow = registerWindow('minesweeper', {
+        onShow: () => {
+            const container = $('minesweeper-body');
+            if (!minesweeperGame && window.Minesweeper && container) minesweeperGame = window.Minesweeper.mount(container, LANG);
+            const firstCell = container && container.querySelector('.ms-cell[tabindex="0"]');
+            if (firstCell && !touchLike.matches) firstCell.focus({ preventScroll: true });
+        },
+        onClose: () => {
+            if (minesweeperGame) minesweeperGame.reset();
+        }
+    });
+
+    function openTerminal() {
+        openWindow(terminalWindow);
+    }
+
+    function closeTerminal() {
+        closeWindow(terminalWindow);
+    }
+
     /* ---------- Salida ---------- */
+
+    const promptLabel = form.querySelector('.prompt');
+    let promptChar = '$';
+
+    function setPrompt(symbol) {
+        promptChar = symbol;
+        if (promptLabel) promptLabel.textContent = symbol;
+    }
 
     function createOutput() {
         const box = el('div', 'output');
@@ -236,7 +449,7 @@
     }
 
     function echoCommand(value) {
-        output.append(el('p', 'line', [el('span', 'prompt', '$'), ' ', el('span', 'cmd', value)]));
+        output.append(el('p', 'line', [el('span', 'prompt', promptChar), ' ', el('span', 'cmd', value)]));
     }
 
     function scrollToEnd() {
@@ -263,6 +476,7 @@
     const history = [];
     let historyIndex = 0;
     let draft = '';
+    let interactive = null; // juego activo en la terminal: recibe lo que se escribe
 
     function define(name, run, options) {
         commands.set(name, { name, description: T.desc[name] || (options && options.description) || '', run, hidden: Boolean(options && options.hidden) });
@@ -378,13 +592,21 @@
                 out.line(T.langSame);
                 return;
             }
-            savePreference(target);
+            writeStorage('lang', target);
             out.line(T.langSwitching);
             setTimeout(() => location.assign(OTHER_HOME), 250);
             return;
         }
         out.line(T.langCurrent());
     });
+
+    define('minesweeper', (out) => {
+        if (!minesweeperWindow) return;
+        out.line(T.minesweeperOpened);
+        openWindow(minesweeperWindow);
+    });
+
+    define('guess', (out) => startGuessGame(out));
 
     define('clear', () => {
         output.replaceChildren();
@@ -452,12 +674,56 @@
     /* Alias ocultos (español y algunos en inglés) */
     const aliases = {
         ayuda: 'help', habilidades: 'skills', proyectos: 'projects', experiencia: 'experience', formacion: 'education', 'formación': 'education',
-        contacto: 'contact', idioma: 'lang', limpiar: 'clear', fecha: 'date', salir: 'exit', language: 'lang', resume: 'cv'
+        contacto: 'contact', idioma: 'lang', buscaminas: 'minesweeper', mines: 'minesweeper', adivina: 'guess', limpiar: 'clear', fecha: 'date',
+        salir: 'exit', language: 'lang', resume: 'cv'
     };
     Object.entries(aliases).forEach(([name, targetName]) => {
         const command = commands.get(targetName);
         define(name, (out, args, argText) => command.run(out, args, argText), { hidden: true, description: command.description });
     });
+
+    /* ---------- Juego en la terminal: adivina el número ---------- */
+
+    function startGuessGame(out) {
+        const secret = 1 + Math.floor(Math.random() * 100);
+        let attempts = 0;
+        const quitWords = ['salir', 'exit', 'quit', 'q'];
+        out.line(T.guessIntro());
+        setPrompt('?');
+        interactive = {
+            handle(value, reply) {
+                const answer = value.trim().toLowerCase();
+                if (quitWords.includes(answer)) return interactive.cancel(reply);
+                const number = Number(answer);
+                if (!/^\d+$/.test(answer) || number < 1 || number > 100) {
+                    reply.error(T.guessInvalid);
+                    return;
+                }
+                attempts++;
+                if (number < secret) {
+                    reply.line(T.guessHigher);
+                } else if (number > secret) {
+                    reply.line(T.guessLower);
+                } else {
+                    const previous = Number(readStorage('guess-best')) || 0;
+                    const record = !previous || attempts < previous;
+                    if (record) writeStorage('guess-best', String(attempts));
+                    reply.line(T.guessWin(attempts) + (record ? T.guessRecord : ''));
+                    reply.muted(T.guessBest(record ? attempts : previous));
+                    endInteractive();
+                }
+            },
+            cancel(reply) {
+                reply.muted(T.guessQuit(secret));
+                endInteractive();
+            }
+        };
+    }
+
+    function endInteractive() {
+        interactive = null;
+        setPrompt('$');
+    }
 
     /* ---------- Ejecución ---------- */
 
@@ -496,18 +762,22 @@
         if (value) {
             if (history[history.length - 1] !== value) history.push(value);
             historyIndex = history.length;
-            const parts = value.split(/\s+/);
-            const name = parts[0].toLowerCase();
-            const args = parts.slice(1);
-            const argText = value.slice(parts[0].length).trim();
-            const command = commands.get(name);
             const out = createOutput();
-            if (command) {
-                command.run(out, args, argText);
+            if (interactive) {
+                interactive.handle(value, out);
             } else {
-                out.error(T.notFound(parts[0]));
-                const alternative = suggest(name);
-                out.muted(alternative ? T.didYouMean(alternative) : T.seeHelp());
+                const parts = value.split(/\s+/);
+                const name = parts[0].toLowerCase();
+                const args = parts.slice(1);
+                const argText = value.slice(parts[0].length).trim();
+                const command = commands.get(name);
+                if (command) {
+                    command.run(out, args, argText);
+                } else {
+                    out.error(T.notFound(parts[0]));
+                    const alternative = suggest(name);
+                    out.muted(alternative ? T.didYouMean(alternative) : T.seeHelp());
+                }
             }
         }
         scrollToEnd();
@@ -547,13 +817,14 @@
         } else if (event.key === 'ArrowDown') {
             event.preventDefault();
             navigateHistory(1);
-        } else if (event.key === 'Tab' && !event.shiftKey && input.value) {
+        } else if (event.key === 'Tab' && !event.shiftKey && input.value && !interactive) {
             event.preventDefault();
             complete();
         } else if (event.ctrlKey && event.key.toLowerCase() === 'c' && !window.getSelection().toString()) {
             event.preventDefault();
             echoCommand(input.value + '^C');
             input.value = '';
+            if (interactive) interactive.cancel(createOutput());
             scrollToEnd();
         } else if (event.ctrlKey && event.key.toLowerCase() === 'l') {
             event.preventDefault();
@@ -568,115 +839,15 @@
         input.focus({ preventScroll: true });
     });
 
-    /* Escribir con la terminal desenfocada la despierta */
+    /* Escribir con la terminal desenfocada la despierta (salvo dentro de otra ventana o del dock) */
     document.addEventListener('keydown', (event) => {
         if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.altKey) return;
-        if (event.target.closest('input, textarea, select, [contenteditable]')) return;
+        if (event.target.closest('input, textarea, select, [contenteditable], .dock, .menubar')) return;
+        if (event.target.closest('.window') && !event.target.closest('#terminal')) return;
         if (event.key.length !== 1 && event.key !== 'Enter') return;
         openTerminal();
         input.focus();
     });
-
-    /* ---------- Ventana ---------- */
-
-    const closeButton = $('close-button');
-    const minimizeButton = $('minimize-button');
-    const maximizeButton = $('maximize-button');
-
-    const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
-    const menubarHeight = () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--menubar-h')) || 0;
-
-    function isMaximized() { return terminal.classList.contains('maximized'); }
-    function isMinimized() { return terminal.classList.contains('minimized'); }
-
-    function positionExplicitly() {
-        if (terminal.classList.contains('is-positioned')) return;
-        const rect = terminal.getBoundingClientRect();
-        terminal.style.left = rect.left + 'px';
-        terminal.style.top = rect.top + 'px';
-        terminal.classList.add('is-positioned');
-    }
-
-    function keepInViewport() {
-        if (!terminal.classList.contains('is-positioned') || isMaximized() || mobileLayout.matches) return;
-        const rect = terminal.getBoundingClientRect();
-        terminal.style.left = clamp(rect.left, 160 - rect.width, window.innerWidth - 160) + 'px';
-        terminal.style.top = clamp(rect.top, menubarHeight(), window.innerHeight - 44) + 'px';
-    }
-
-    function openTerminal() {
-        const wasHidden = terminal.classList.contains('is-closed') || isMinimized();
-        terminal.classList.remove('is-closed', 'minimized');
-        if (desktopNote) desktopNote.hidden = true;
-        if (wasHidden) scrollToEnd();
-    }
-
-    function closeTerminal() {
-        terminal.classList.add('is-closed');
-        input.blur();
-        if (desktopNote) desktopNote.hidden = false;
-    }
-
-    function toggleMaximize() {
-        terminal.classList.remove('minimized');
-        terminal.classList.toggle('maximized');
-        maximizeButton.setAttribute('aria-label', isMaximized() ? T.restoreLabel : T.maximizeLabel);
-        maximizeButton.title = isMaximized() ? T.restore : T.maximize;
-        scrollToEnd();
-    }
-
-    closeButton.addEventListener('click', closeTerminal);
-
-    minimizeButton.addEventListener('click', () => {
-        terminal.classList.toggle('minimized');
-        if (!isMinimized()) {
-            scrollToEnd();
-            input.focus({ preventScroll: true });
-        }
-    });
-
-    maximizeButton.addEventListener('click', () => {
-        toggleMaximize();
-        input.focus({ preventScroll: true });
-    });
-
-    header.addEventListener('click', (event) => {
-        if (event.target.closest('button')) return;
-        if (isMinimized()) openTerminal();
-    });
-
-    header.addEventListener('dblclick', (event) => {
-        if (event.target.closest('button') || mobileLayout.matches) return;
-        toggleMaximize();
-    });
-
-    let drag = null;
-
-    header.addEventListener('pointerdown', (event) => {
-        if (event.button !== 0 || event.target.closest('button') || isMaximized() || mobileLayout.matches) return;
-        positionExplicitly();
-        const rect = terminal.getBoundingClientRect();
-        drag = { id: event.pointerId, dx: event.clientX - rect.left, dy: event.clientY - rect.top, width: rect.width };
-        header.setPointerCapture(event.pointerId);
-        terminal.classList.add('is-dragging');
-    });
-
-    header.addEventListener('pointermove', (event) => {
-        if (!drag || event.pointerId !== drag.id) return;
-        terminal.style.left = clamp(event.clientX - drag.dx, 160 - drag.width, window.innerWidth - 160) + 'px';
-        terminal.style.top = clamp(event.clientY - drag.dy, menubarHeight(), window.innerHeight - 44) + 'px';
-    });
-
-    function endDrag(event) {
-        if (!drag || event.pointerId !== drag.id) return;
-        drag = null;
-        terminal.classList.remove('is-dragging');
-    }
-
-    header.addEventListener('pointerup', endDrag);
-    header.addEventListener('pointercancel', endDrag);
-
-    window.addEventListener('resize', keepInViewport);
 
     /* ---------- Iconos del escritorio ---------- */
 
@@ -688,10 +859,12 @@
         });
     });
 
-    document.querySelectorAll('.icon[data-action="terminal"]').forEach((icon) => {
+    document.querySelectorAll('.icon[data-open]').forEach((icon) => {
         icon.addEventListener('click', () => {
-            openTerminal();
-            input.focus({ preventScroll: true });
+            const win = windows.get(icon.dataset.open);
+            if (!win) return;
+            openWindow(win);
+            if (win === terminalWindow && !touchLike.matches) input.focus({ preventScroll: true });
         });
     });
 
@@ -710,5 +883,6 @@
 
     /* ---------- Arranque ---------- */
 
+    focusWindow(terminalWindow, true);
     if (!touchLike.matches) input.focus({ preventScroll: true });
 })();

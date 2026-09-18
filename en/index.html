@@ -51,6 +51,7 @@
     }
     </script>
     <script src="/content.js" defer></script>
+    <script src="/minesweeper.js" defer></script>
     <script src="/script.js" defer></script>
 </head>
 <body>
@@ -92,26 +93,32 @@
                 </span>
                 <span class="icon-label">GitHub</span>
             </a>
-            <button class="icon" type="button" data-action="terminal">
+            <button class="icon" type="button" data-open="minesweeper">
+                <span class="icon-tile icon-mines" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="6"/><path d="M12 3v4M12 19v2M3 13h4M17 13h4M6 7l2.5 2.5M15.5 9.5L18 7M6 19l2.5-2.5M15.5 16.5L18 19"/></svg>
+                </span>
+                <span class="icon-label">Minesweeper</span>
+            </button>
+            <button class="icon" type="button" data-open="terminal">
                 <span class="icon-tile icon-terminal" aria-hidden="true">
                     <svg viewBox="0 0 24 24"><path d="M4 17l6-6-6-6M12 19h8"/></svg>
                 </span>
                 <span class="icon-label">Terminal</span>
             </button>
         </nav>
-        <p class="desktop-note" id="desktop-note" hidden>The terminal is closed. Open it with the Terminal icon or press any key.</p>
+        <p class="desktop-note" id="desktop-note" hidden>The terminal is closed. Open it from the dock, with the Terminal icon or by pressing any key.</p>
     </div>
 
-    <main class="terminal" id="terminal" aria-label="Interactive terminal">
-        <div class="terminal-header" id="terminal-header">
+    <main class="window terminal" id="terminal" aria-label="Interactive terminal">
+        <div class="window-header terminal-header" id="terminal-header">
             <div class="traffic-lights">
-                <button class="light close" id="close-button" type="button" title="Close" aria-label="Close terminal"></button>
-                <button class="light minimize" id="minimize-button" type="button" title="Minimize" aria-label="Minimize terminal"></button>
-                <button class="light maximize" id="maximize-button" type="button" title="Maximize" aria-label="Maximize terminal"></button>
+                <button class="light close" id="close-button" type="button" data-action="close" title="Close" aria-label="Close terminal"></button>
+                <button class="light minimize" id="minimize-button" type="button" data-action="minimize" title="Minimize" aria-label="Minimize terminal"></button>
+                <button class="light maximize" id="maximize-button" type="button" data-action="maximize" title="Maximize" aria-label="Maximize terminal"></button>
             </div>
-            <span class="terminal-title">jose@josejordan.dev: ~</span>
+            <span class="window-title terminal-title">jose@josejordan.dev: ~</span>
         </div>
-        <div class="terminal-body" id="terminal-body">
+        <div class="window-body terminal-body" id="terminal-body">
             <div class="terminal-output" id="terminal-output" role="log" aria-live="polite">
                 <div class="boot">
                     <p class="line"><span class="prompt">$</span> <span class="cmd">cat welcome.txt</span></p>
@@ -130,5 +137,27 @@
             </form>
         </div>
     </main>
+
+    <section class="window app-minesweeper is-closed" id="minesweeper" aria-label="Minesweeper">
+        <div class="window-header">
+            <div class="traffic-lights">
+                <button class="light close" type="button" data-action="close" title="Close" aria-label="Close Minesweeper"></button>
+                <button class="light minimize" type="button" data-action="minimize" title="Minimize" aria-label="Minimize Minesweeper"></button>
+            </div>
+            <span class="window-title">Minesweeper</span>
+        </div>
+        <div class="window-body" id="minesweeper-body"></div>
+    </section>
+
+    <nav class="dock" aria-label="Dock">
+        <button class="dock-item" type="button" data-window="terminal">
+            <span class="dock-icon icon-terminal" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 17l6-6-6-6M12 19h8"/></svg></span>
+            <span class="dock-label">Terminal</span>
+        </button>
+        <button class="dock-item" type="button" data-window="minesweeper">
+            <span class="dock-icon icon-mines" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="6"/><path d="M12 3v4M12 19v2M3 13h4M17 13h4M6 7l2.5 2.5M15.5 9.5L18 7M6 19l2.5-2.5M15.5 16.5L18 19"/></svg></span>
+            <span class="dock-label">Minesweeper</span>
+        </button>
+    </nav>
 </body>
 </html>
