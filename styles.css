@@ -363,6 +363,9 @@ h1.line {
 
 .rows .key { color: var(--accent); }
 
+.rows.spaced { row-gap: 10px; }
+.rows strong { font-weight: 700; }
+
 ol.projects {
     padding-left: 2.4em;
 }

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Personal portfolio website for Jose Jordan (software developer in Córdoba, Spain: Kotlin/Android apps and AI integrations). The site simulates a desktop environment with an interactive terminal that acts as the portfolio and contact interface. The whole site is in Spanish.
+Personal portfolio website for Jose Jordan (full-stack developer in Córdoba, Spain: Python ETL and data work, Vue.js, Kotlin/Android apps, AI training). Content mirrors his CV (`cv-jose-jordan.pdf`). The site simulates a desktop environment with an interactive terminal that acts as the portfolio and contact interface. The whole site is in Spanish.
 
 ## Architecture
 
@@ -12,18 +12,19 @@ Static site: HTML, CSS and vanilla JavaScript. No build step, no package manager
 
 ### Files
 - **index.html**: desktop (menu bar, icons) and the terminal window. Contains SEO metadata, Open Graph tags and JSON-LD.
-- **content.js**: all editable content (about text, skills, projects with GitHub URLs, links, jokes, quotes, optional `cvUrl`). Defines a global `CONTENT` object. Edit this file to update what the terminal shows.
+- **content.js**: all editable content (about text, skills, experience, education, certifications, projects with GitHub URLs, links, jokes, quotes, `cvUrl`). Defines a global `CONTENT` object. Edit this file to update what the terminal shows.
 - **script.js**: terminal logic. Commands are registered with `define(name, description, run, { hidden })`; output is built with DOM nodes (never `innerHTML` with user input). Also handles history (↑/↓), Tab completion, unknown-command suggestions, the draggable/minimizable/maximizable window (Pointer Events), desktop icons, and the menu bar clock.
 - **styles.css**: design tokens in `:root`, wallpaper (CSS gradients plus an inline SVG pattern of horseshoe arches), icons, terminal window, mobile layout (`max-width: 720px`), reduced-motion support.
 - **404.html**: custom not-found page (uses absolute paths to `/styles.css`).
 - **privacy.html** + **privacy.css**: privacy policy for the mobile apps. Legal text must stay intact.
 - **fonts/**: JetBrains Mono variable font (subset, SIL OFL) and its license.
 - **favicon.svg**, **apple-touch-icon.png**, **og.png**: icons and social preview image.
+- **cv-jose-jordan.pdf**: the CV opened by the `cv` command and the CV desktop icon (`cvUrl` in content.js).
 - **robots.txt**, **sitemap.xml**.
 
 ### Terminal commands
-Visible in `help`: `help`, `about`, `skills`, `projects`, `contact`, `cv`, `open`, `clear`, `history`, `date`, `echo`, `joke`, `quote`.
-Hidden extras: `whoami`, `hostname`, `pwd`, `ls`, `cat`, `sudo`, `exit`, `hola`, `hello`.
+Visible in `help`: `help`, `about`, `skills`, `projects`, `experience`, `education`, `contact`, `cv`, `open`, `clear`, `history`, `date`, `echo`, `joke`, `quote`.
+Hidden extras: `whoami`, `hostname`, `pwd`, `ls`, `cat`, `sudo`, `exit`, `hola`, `hello`, plus Spanish aliases (`ayuda`, `habilidades`, `proyectos`, `experiencia`, `formacion`, `contacto`, `limpiar`, `fecha`, `salir`).
 
 ## Cloudflare hosting
 

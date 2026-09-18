@@ -9,7 +9,7 @@ const CONTENT = Object.freeze({
     host: 'josejordan.dev',
 
     // Ruta o URL del CV en PDF (por ejemplo 'cv.pdf'). Déjalo vacío si no está publicado.
-    cvUrl: '',
+    cvUrl: 'cv-jose-jordan.pdf',
 
     links: {
         email: 'info@josejordan.dev',
@@ -20,17 +20,42 @@ const CONTENT = Object.freeze({
     },
 
     about: [
-        'Soy Jose Jordan, desarrollador de software en Córdoba (España).',
-        'Construyo aplicaciones Android y multiplataforma con Kotlin y Jetpack Compose, e integro modelos de lenguaje (OpenAI, Claude, Gemini, Mistral, Ollama) en apps y herramientas.',
-        'Me gusta aprender construyendo: en GitHub tengo más de cien repositorios públicos con apps, juegos, experimentos y prototipos.'
+        'Soy Jose Jordan, desarrollador full stack en Córdoba (España).',
+        'Hoy desarrollo procesos ETL en Python, integro APIs, diseño bases de datos SQL y construyo interfaces en Vue.js. Antes he creado apps Android con Kotlin y Jetpack Compose y sistemas de gestión empresarial en Java.',
+        'También doy formación en inteligencia artificial y ciencia de datos, y sigo aprendiendo construyendo: en GitHub tengo más de cien repositorios públicos con apps, experimentos y prototipos.'
     ],
 
     skills: [
-        { area: 'Móvil', items: ['Kotlin', 'Android', 'Jetpack Compose', 'Kotlin Multiplatform y Kotlin/Native'] },
-        { area: 'IA', items: ['APIs de OpenAI, Claude, Gemini y Mistral', 'Ollama', 'LangChain y Langchain4j', 'ML Kit'] },
-        { area: 'Backend', items: ['Java y Spring Boot', 'Python (Flask)', 'Node.js', 'MongoDB'] },
-        { area: 'Web', items: ['JavaScript y TypeScript', 'HTML y CSS', 'React y Expo'] },
-        { area: 'Herramientas', items: ['Git y GitHub Actions', 'Gradle', 'Docker', 'Cloudflare'] }
+        { area: 'Datos', items: ['ETL con Python (Pandas, APIs)', 'Diseño de bases de datos y SQL', 'Automatización de flujos de información'] },
+        { area: 'Backend', items: ['Python (Flask, Django, APIs REST)', 'Java y Spring Boot'] },
+        { area: 'Frontend', items: ['Vue.js', 'JavaScript y TypeScript', 'HTML y CSS'] },
+        { area: 'Móvil', items: ['Kotlin', 'Android', 'Jetpack Compose', 'Firebase'] },
+        { area: 'IA', items: ['Machine learning', 'APIs de OpenAI, Claude, Gemini y Mistral', 'Ollama', 'LangChain y Langchain4j'] },
+        { area: 'Otros', items: ['Git y GitHub Actions', 'Docker', 'Cloudflare', 'Docencia en IA y ciencia de datos'] }
+    ],
+
+    // Experiencia profesional (resumen del CV). Se muestra con el comando "experience".
+    experience: [
+        { period: '2025 – actualidad', role: 'Desarrollador full stack', place: 'Humansyde', desc: 'Procesos ETL en Python, integración de APIs, diseño de bases de datos SQL y componentes en Vue.js conectados a los flujos de datos.' },
+        { period: '2024 – actualidad', role: 'Docente y formador en IA y ciencia de datos', place: '', desc: 'Diseño e impartición de cursos de IA, machine learning y ciencia de datos, con proyectos prácticos aplicados a distintos sectores.' },
+        { period: '2021 – 2024', role: 'Desarrollador Android', place: 'Freelance', desc: 'Aplicaciones móviles en Kotlin, Jetpack Compose y Firebase, con integración de soluciones de IA.' },
+        { period: '2019 – 2021', role: 'Desarrollador Java', place: 'Freelance', desc: 'Sistemas de gestión empresarial en Java con back-end escalable, rendimiento y seguridad.' },
+        { period: '2000 – 2019', role: 'Dirección y gestión tecnológica', place: 'eCommerce e IT', desc: 'Dirección de una empresa tecnológica especializada en eCommerce, soporte IT y plataformas online.' },
+        { period: '2012 – 2015', role: 'Especialista en eCommerce', place: 'Freelance', desc: 'Tiendas online con Shopify, Prestashop y WordPress, pasarelas de pago y SEO.' }
+    ],
+
+    // Formación y certificaciones. Se muestran con el comando "education".
+    education: [
+        'Certificación Profesional en Docencia (2025)',
+        'Técnico Superior en Desarrollo de Aplicaciones Multiplataforma (2019)',
+        'Inglés B1, EOI Córdoba (2018)'
+    ],
+    certifications: [
+        'IA Aplicada a Gestión de Procesos (2025)',
+        'Backend Avanzado: Python, Flask y Django (2025)',
+        'AI Fundamentals, IBM (2024)',
+        'Big Data IFCT128PO, ADAMS (2020)',
+        'Java SE 8, Oracle (2022)'
     ],
 
     // Proyectos públicos de GitHub. El número de orden se usa en "open <n>".

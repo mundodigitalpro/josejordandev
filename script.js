@@ -131,6 +131,25 @@
         out.muted(['Escribe ', kbd('open 1'), ' para abrir un proyecto o ', kbd('open github'), ' para ver todos los repositorios.']);
     });
 
+    define('experience', 'Experiencia profesional', (out) => {
+        const rows = el('div', 'rows spaced');
+        (site.experience || []).forEach((job) => {
+            const title = [el('strong', null, job.role)];
+            if (job.place) title.push(' ', el('span', 'tag', job.place));
+            rows.append(el('span', 'key', job.period), el('span', null, [...title, el('br'), job.desc]));
+        });
+        out.node(rows);
+        out.muted(['El detalle completo está en el CV: escribe ', kbd('cv'), '.']);
+    });
+
+    define('education', 'Formación y certificaciones', (out) => {
+        const rows = el('div', 'rows spaced');
+        const lines = (items) => items.flatMap((text, i) => (i ? [el('br'), text] : [text]));
+        if ((site.education || []).length) rows.append(el('span', 'key', 'Formación'), el('span', null, lines(site.education)));
+        if ((site.certifications || []).length) rows.append(el('span', 'key', 'Certificaciones'), el('span', null, lines(site.certifications)));
+        out.node(rows);
+    });
+
     define('contact', 'Cómo contactar conmigo', (out) => {
         const rows = el('div', 'rows');
         const add = (key, href, text) => rows.append(el('span', 'key', key), el('span', null, link(href, text)));
@@ -221,16 +240,17 @@
     define('pwd', 'Directorio actual', (out) => out.line('/home/' + (site.user || 'jose')), { hidden: true });
 
     const files = { 'about.txt': 'about', 'skills.txt': 'skills', 'projects.md': 'projects', 'contact.txt': 'contact', 'bienvenida.txt': null };
+    const cvFile = site.cvUrl ? site.cvUrl.split('/').pop() : '';
 
     define('ls', 'Lista los ficheros', (out) => {
         const names = Object.keys(files);
-        if (site.cvUrl) names.push('cv.pdf');
+        if (cvFile) names.push(cvFile);
         out.line(names.join('  '));
     }, { hidden: true });
 
     define('cat', 'Muestra un fichero', (out, args) => {
         const name = args[0] || '';
-        if (name === 'cv.pdf' && site.cvUrl) return commands.get('cv').run(out, [], '');
+        if (cvFile && (name === cvFile || name === 'cv.pdf')) return commands.get('cv').run(out, [], '');
         if (name === 'bienvenida.txt') {
             out.line((site.about || [])[0] || site.name || '');
             out.muted(['Escribe ', kbd('help'), ' para ver los comandos.']);
@@ -248,6 +268,13 @@
     define('exit', 'Cierra la terminal', () => closeTerminal(), { hidden: true });
     define('hola', 'Saludo', (out) => out.line(['¡Hola! Encantado de verte por aquí. Escribe ', kbd('help'), ' para empezar.']), { hidden: true });
     define('hello', 'Saludo', (out) => commands.get('hola').run(out, [], ''), { hidden: true });
+
+    /* Alias en español (ocultos en help) */
+    const aliases = { ayuda: 'help', habilidades: 'skills', proyectos: 'projects', experiencia: 'experience', formacion: 'education', 'formación': 'education', contacto: 'contact', limpiar: 'clear', fecha: 'date', salir: 'exit' };
+    Object.entries(aliases).forEach(([name, target]) => {
+        const command = commands.get(target);
+        define(name, command.description, (out, args, argText) => command.run(out, args, argText), { hidden: true });
+    });
 
     /* ---------- Ejecución ---------- */
 

@@ -11,6 +11,7 @@ Sitio estático (HTML, CSS y JavaScript sin dependencias ni proceso de build) al
 | `content.js` | Textos, habilidades, proyectos y enlaces. **Edita este fichero para actualizar el contenido.** |
 | `script.js` | Lógica de la terminal (comandos, historial, autocompletado, ventana arrastrable) |
 | `styles.css` | Estilos del escritorio y la terminal |
+| `cv-jose-jordan.pdf` | CV que abren el comando `cv` y el icono CV |
 | `404.html` | Página de error |
 | `privacy.html`, `privacy.css` | Política de privacidad de las apps |
 | `fonts/` | JetBrains Mono (SIL Open Font License) |
