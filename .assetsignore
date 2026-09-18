@@ -1,0 +1,10 @@
+# Ficheros que no se publican como assets estáticos (Cloudflare Workers).
+# Misma sintaxis que .gitignore.
+.git
+.wrangler
+.gitignore
+.assetsignore
+CLAUDE.md
+README.md
+wrangler.jsonc
+node_modules

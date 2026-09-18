@@ -2,38 +2,121 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jose Jordan - Desarrollador de Aplicaciones</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+    <title>Jose Jordan | Desarrollador de software, Android e IA</title>
+    <meta name="description" content="Portfolio de Jose Jordan, desarrollador de software en Córdoba: aplicaciones Android con Kotlin y Jetpack Compose e integración de modelos de IA. Una terminal interactiva para conocer sus proyectos y contactar.">
+    <meta name="author" content="Jose Jordan">
+    <meta name="theme-color" content="#171321">
+    <link rel="canonical" href="https://josejordan.dev/">
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="es_ES">
+    <meta property="og:site_name" content="josejordan.dev">
+    <meta property="og:title" content="Jose Jordan | Desarrollador de software, Android e IA">
+    <meta property="og:description" content="Aplicaciones Android con Kotlin y Jetpack Compose e integración de modelos de IA. Entra en la terminal para ver proyectos y contactar.">
+    <meta property="og:url" content="https://josejordan.dev/">
+    <meta property="og:image" content="https://josejordan.dev/og.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Terminal con la presentación de Jose Jordan, desarrollador de software, Android e IA">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@josejordandev">
+    <meta name="twitter:creator" content="@josejordandev">
+
+    <link rel="preload" href="fonts/JetBrainsMono-var.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Jose Jordan",
+      "url": "https://josejordan.dev/",
+      "jobTitle": "Desarrollador de software",
+      "email": "mailto:info@josejordan.dev",
+      "address": { "@type": "PostalAddress", "addressLocality": "Córdoba", "addressCountry": "ES" },
+      "knowsAbout": ["Kotlin", "Android", "Jetpack Compose", "Inteligencia artificial", "Java", "Python", "JavaScript"],
+      "sameAs": [
+        "https://github.com/mundodigitalpro",
+        "https://www.linkedin.com/in/josejordan1/",
+        "https://x.com/josejordandev"
+      ]
+    }
+    </script>
+    <script src="content.js" defer></script>
+    <script src="script.js" defer></script>
 </head>
 <body>
-    <div class="desktop">
-        <div class="desktop-icons">
-            <div class="icon">
-                <i class="fas fa-folder"></i>
-                <span>Proyectos</span>
-            </div>
-            <div class="icon">
-                <i class="fas fa-file-pdf"></i>
-                <span>CV.pdf</span>
-            </div>
-            <div class="icon">
-                <i class="fas fa-envelope"></i>
-                <span>Contacto</span>
-            </div>
-        </div>
+    <header class="menubar">
+        <span class="menubar-brand">josejordan.dev</span>
+        <time class="menubar-clock" id="clock"></time>
+    </header>
+
+    <!-- Iconos: Feather Icons (MIT), https://feathericons.com -->
+    <div class="desktop" id="desktop">
+        <nav class="desktop-icons" aria-label="Escritorio">
+            <button class="icon" type="button" data-command="projects">
+                <span class="icon-tile icon-folder" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                </span>
+                <span class="icon-label">Proyectos</span>
+            </button>
+            <button class="icon" type="button" data-command="cv">
+                <span class="icon-tile icon-cv" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+                </span>
+                <span class="icon-label">CV</span>
+            </button>
+            <button class="icon" type="button" data-command="contact">
+                <span class="icon-tile icon-mail" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg>
+                </span>
+                <span class="icon-label">Contacto</span>
+            </button>
+            <a class="icon" href="https://github.com/mundodigitalpro" target="_blank" rel="noopener noreferrer">
+                <span class="icon-tile icon-github" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+                </span>
+                <span class="icon-label">GitHub</span>
+            </a>
+            <button class="icon" type="button" data-action="terminal">
+                <span class="icon-tile icon-terminal" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M4 17l6-6-6-6M12 19h8"/></svg>
+                </span>
+                <span class="icon-label">Terminal</span>
+            </button>
+        </nav>
+        <p class="desktop-note" id="desktop-note" hidden>La terminal está cerrada. Ábrela con el icono Terminal o pulsa cualquier tecla.</p>
     </div>
-    <div class="terminal" id="terminal">
+
+    <main class="terminal" id="terminal" aria-label="Terminal interactiva">
         <div class="terminal-header" id="terminal-header">
-            <div class="terminal-button red" id="close-button"></div>
-            <div class="terminal-button yellow" id="minimize-button"></div>
-            <div class="terminal-button green" id="maximize-button"></div>
+            <div class="traffic-lights">
+                <button class="light close" id="close-button" type="button" title="Cerrar" aria-label="Cerrar terminal"></button>
+                <button class="light minimize" id="minimize-button" type="button" title="Minimizar" aria-label="Minimizar terminal"></button>
+                <button class="light maximize" id="maximize-button" type="button" title="Maximizar" aria-label="Maximizar terminal"></button>
+            </div>
+            <span class="terminal-title">jose@josejordan.dev: ~</span>
         </div>
-        <div class="terminal-window" id="terminal-window">
-            <p>Bienvenido al terminal de Jose Jordan. Escribe 'help' para ver los comandos disponibles.</p>
+        <div class="terminal-body" id="terminal-body">
+            <div class="terminal-output" id="terminal-output" role="log" aria-live="polite">
+                <div class="boot">
+                    <p class="line"><span class="prompt">$</span> <span class="cmd">cat bienvenida.txt</span></p>
+                    <h1 class="line">Jose Jordan</h1>
+                    <p class="line">Desarrollador de software en Córdoba. Construyo aplicaciones Android con Kotlin y Jetpack Compose e integro modelos de inteligencia artificial en apps y herramientas.</p>
+                    <p class="line muted">Escribe <kbd>help</kbd> para ver los comandos o usa los iconos del escritorio.</p>
+                </div>
+                <noscript>
+                    <p class="line">Esta terminal necesita JavaScript. Sin él, puedes escribirme a <a href="mailto:info@josejordan.dev">info@josejordan.dev</a> o ver mis proyectos en <a href="https://github.com/mundodigitalpro">GitHub</a>.</p>
+                </noscript>
+            </div>
+            <form class="input-line" id="input-form" autocomplete="off">
+                <label class="prompt" for="command-input">$</label>
+                <input id="command-input" class="command-input" type="text" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="send" aria-label="Escribe un comando">
+            </form>
         </div>
-    </div>
-    <script src="script.js"></script>
+    </main>
 </body>
 </html>

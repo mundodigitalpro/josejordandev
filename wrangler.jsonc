@@ -1,7 +1,11 @@
 {
+  // Despliegue en Cloudflare Workers con assets estáticos: `npx wrangler deploy`.
+  // El dominio josejordan.dev se sirve hoy desde el proyecto de Cloudflare Pages
+  // "josejordandev" (conectado a GitHub), que ignora este fichero.
   "name": "josejordan-portfolio",
   "compatibility_date": "2025-08-24",
   "assets": {
-    "directory": "./"
+    "directory": "./",
+    "not_found_handling": "404-page"
   }
 }

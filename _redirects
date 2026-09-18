@@ -1,0 +1,7 @@
+# Ficheros del repositorio que no deben verse en la web.
+# En Workers los excluye .assetsignore; en Pages se redirigen al inicio.
+/CLAUDE.md       /  301
+/README.md       /  301
+/wrangler.jsonc  /  301
+/.gitignore      /  301
+/.assetsignore   /  301

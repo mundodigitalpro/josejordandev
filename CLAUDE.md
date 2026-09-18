@@ -4,78 +4,51 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a personal portfolio website for Jose Jordan, an application developer. The project simulates a desktop environment with an interactive terminal that serves as a personal portfolio and resume interface.
+Personal portfolio website for Jose Jordan (software developer in Córdoba, Spain: Kotlin/Android apps and AI integrations). The site simulates a desktop environment with an interactive terminal that acts as the portfolio and contact interface. The whole site is in Spanish.
 
 ## Architecture
 
-The project consists of a simple static website with three main components:
+Static site: HTML, CSS and vanilla JavaScript. No build step, no package manager, no external dependencies (the font is self-hosted).
 
-### Core Files
-- **index.html**: Main page with desktop interface and draggable terminal window
-- **script.js**: Interactive terminal functionality with command system
-- **styles.css**: CSS styling for desktop environment and terminal interface
-- **privacy.html**: Privacy policy page
+### Files
+- **index.html**: desktop (menu bar, icons) and the terminal window. Contains SEO metadata, Open Graph tags and JSON-LD.
+- **content.js**: all editable content (about text, skills, projects with GitHub URLs, links, jokes, quotes, optional `cvUrl`). Defines a global `CONTENT` object. Edit this file to update what the terminal shows.
+- **script.js**: terminal logic. Commands are registered with `define(name, description, run, { hidden })`; output is built with DOM nodes (never `innerHTML` with user input). Also handles history (↑/↓), Tab completion, unknown-command suggestions, the draggable/minimizable/maximizable window (Pointer Events), desktop icons, and the menu bar clock.
+- **styles.css**: design tokens in `:root`, wallpaper (CSS gradients plus an inline SVG pattern of horseshoe arches), icons, terminal window, mobile layout (`max-width: 720px`), reduced-motion support.
+- **404.html**: custom not-found page (uses absolute paths to `/styles.css`).
+- **privacy.html** + **privacy.css**: privacy policy for the mobile apps. Legal text must stay intact.
+- **fonts/**: JetBrains Mono variable font (subset, SIL OFL) and its license.
+- **favicon.svg**, **apple-touch-icon.png**, **og.png**: icons and social preview image.
+- **robots.txt**, **sitemap.xml**.
 
-### Key Components
+### Terminal commands
+Visible in `help`: `help`, `about`, `skills`, `projects`, `contact`, `cv`, `open`, `clear`, `history`, `date`, `echo`, `joke`, `quote`.
+Hidden extras: `whoami`, `hostname`, `pwd`, `ls`, `cat`, `sudo`, `exit`, `hola`, `hello`.
 
-#### Desktop Environment (`index.html`)
-- Simulates a desktop with clickable icons (Projects, CV.pdf, Contact)
-- Features a draggable, resizable terminal window with Mac-style controls
-- Terminal window can be minimized, maximized, and closed
+## Cloudflare hosting
 
-#### Terminal System (`script.js`)
-- Interactive command-line interface with the following commands:
-  - `help`: Shows available commands
-  - `about`: Personal information about Jose Jordan
-  - `skills`: Technical skills listing
-  - `projects`: Portfolio projects
-  - `contact`: Contact information
-  - `clear`: Clears terminal screen
-  - `echo`: Repeats text with special formatting
-  - `date`: Current date/time
-  - `joke`: Programming jokes
-  - `quote`: Programming quotes
-
-- Terminal features:
-  - Drag and drop functionality for window positioning
-  - Blinking cursor animation
-  - Command history and execution
-  - Desktop icon integration (clicking icons executes commands)
-
-#### Styling (`styles.css`)
-- Dark theme with terminal-style interface
-- Responsive design with desktop simulation
-- Mac-style window controls (red/yellow/green buttons)
-- Smooth animations and transitions
+- The domain **josejordan.dev is served by Cloudflare Pages** (project `josejordandev`, connected to GitHub; every push to `main` deploys; no build command; output directory is the repo root).
+- **wrangler.jsonc** is a Workers configuration (static assets). Pages ignores it (no `pages_build_output_dir`). It allows an alternative deployment with `npx wrangler deploy`.
+- **_headers**: security headers including a strict Content-Security-Policy (`script-src 'self'`, `style-src 'self'`). Do not add inline `<script>` or `<style>` blocks or inline `style=""` attributes; put JS/CSS in files. JSON-LD blocks are fine.
+- **_redirects**: redirects repository files (CLAUDE.md, README.md, wrangler.jsonc, .gitignore, .assetsignore) to `/` so they are not exposed on Pages.
+- **.assetsignore**: excludes the same files from Workers static asset uploads.
+- **404.html** is served for unknown paths (Pages does this automatically; Workers via `not_found_handling: "404-page"`).
 
 ## Development Commands
 
-This is a static website project. No build tools, package managers, or development servers are configured.
-
-### Running the Project
-Since this is a static HTML/CSS/JavaScript project:
-- Open `index.html` directly in a web browser
-- Or serve via any static file server (e.g., Python's `python -m http.server`)
-
-### File Structure
-```
-/
-├── index.html          # Main portfolio page
-├── script.js           # Terminal functionality
-├── styles.css          # Styling
-├── privacy.html        # Privacy policy
-└── CLAUDE.md          # This file
-```
+Any static server works:
+- `python3 -m http.server 8000`
+- `npx wrangler pages dev .` reproduces Pages behaviour (headers, redirects, 404).
+- `npx wrangler dev` reproduces the Workers variant.
 
 ## Contact Information
 - **Developer**: Jose Jordan
 - **Email**: info@josejordan.dev
 - **LinkedIn**: https://www.linkedin.com/in/josejordan1/
 - **GitHub**: github.com/mundodigitalpro
-- **Twitter**: @josejordandev
+- **X (Twitter)**: @josejordandev
 
 ## Notes
-- The project is entirely in Spanish
-- No external dependencies beyond Font Awesome icons (loaded via CDN)
-- No build process or compilation required
-- All functionality is client-side JavaScript
+- Keep the site static and dependency-free so it stays compatible with Cloudflare Pages/Workers.
+- Content changes go in `content.js`; keep logic in `script.js`.
+- Respect the CSP in `_headers` when adding features.
