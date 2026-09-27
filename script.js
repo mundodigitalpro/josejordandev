@@ -84,6 +84,7 @@
                 education: 'Formación y certificaciones',
                 contact: 'Cómo contactar conmigo',
                 cv: 'Currículum',
+                mail: 'Envíame un mensaje: mail [texto]',
                 open: 'Abre un enlace: open github | linkedin | email | cv | <nº de proyecto>',
                 lang: 'Cambia el idioma: lang en | lang es',
                 minesweeper: 'Abre el Buscaminas en su ventana',
@@ -141,10 +142,31 @@
             guessRecord: ' Nuevo récord.',
             guessBest: (n) => 'Tu mejor marca: ' + n + (n === 1 ? ' intento.' : ' intentos.'),
             guessQuit: (secret) => 'Partida abandonada. El número era ' + secret + '.',
-            restoreLabel: 'Restaurar tamaño de la terminal',
-            maximizeLabel: 'Maximizar terminal',
+            restoreLabel: { terminal: 'Restaurar tamaño de la terminal', projects: 'Restaurar tamaño de Proyectos' },
+            maximizeLabel: { terminal: 'Maximizar terminal', projects: 'Maximizar Proyectos' },
             restore: 'Restaurar',
-            maximize: 'Maximizar'
+            maximize: 'Maximizar',
+            contactHint: () => ['Escribe ', kbd('mail'), ' para enviarme un mensaje sin salir de aquí.'],
+            mailOpened: 'Formulario de contacto abierto en su propia ventana.',
+            projectsIntro: 'Una selección de proyectos personales. Filtra por lenguaje o abre el código en GitHub.',
+            projectsFilter: 'Filtrar por lenguaje',
+            projectsAll: 'Todos',
+            projectCode: 'Código',
+            projectDemo: 'Demo',
+            projectsMore: 'Más repositorios en ',
+            contactIntro: '¿Un proyecto, una oferta o una pregunta? Escríbeme y te respondo por email.',
+            contactName: 'Nombre',
+            contactEmail: 'Tu email',
+            contactMessage: 'Mensaje',
+            contactHoneypot: 'Deja este campo vacío',
+            contactSend: 'Enviar mensaje',
+            contactSending: 'Enviando…',
+            contactSent: '¡Mensaje enviado! Te responderé lo antes posible.',
+            contactInvalid: 'Revisa los campos: nombre, un email válido y un mensaje de al menos 10 caracteres.',
+            contactCaptcha: 'Completa la verificación antes de enviar.',
+            contactFailed: 'No se ha podido enviar el mensaje. Puedes escribirme directamente a ',
+            contactOr: 'También puedes escribirme a ',
+            contactSubject: 'Contacto desde josejordan.dev'
         },
         en: {
             desc: {
@@ -156,6 +178,7 @@
                 education: 'Education and certifications',
                 contact: 'How to reach me',
                 cv: 'Résumé (CV)',
+                mail: 'Send me a message: mail [text]',
                 open: 'Open a link: open github | linkedin | email | cv | <project number>',
                 lang: 'Switch language: lang en | lang es',
                 minesweeper: 'Open Minesweeper in its own window',
@@ -214,10 +237,31 @@
             guessRecord: ' New record.',
             guessBest: (n) => 'Your best: ' + n + (n === 1 ? ' try.' : ' tries.'),
             guessQuit: (secret) => 'Game over. The number was ' + secret + '.',
-            restoreLabel: 'Restore terminal size',
-            maximizeLabel: 'Maximize terminal',
+            restoreLabel: { terminal: 'Restore terminal size', projects: 'Restore Projects size' },
+            maximizeLabel: { terminal: 'Maximize terminal', projects: 'Maximize Projects' },
             restore: 'Restore',
-            maximize: 'Maximize'
+            maximize: 'Maximize',
+            contactHint: () => ['Type ', kbd('mail'), ' to send me a message from right here.'],
+            mailOpened: 'The contact form is open in its own window.',
+            projectsIntro: 'A selection of personal projects. Filter by language or open the code on GitHub.',
+            projectsFilter: 'Filter by language',
+            projectsAll: 'All',
+            projectCode: 'Code',
+            projectDemo: 'Demo',
+            projectsMore: 'More repositories at ',
+            contactIntro: 'A project, a job offer or a question? Write to me and I will reply by email.',
+            contactName: 'Name',
+            contactEmail: 'Your email',
+            contactMessage: 'Message',
+            contactHoneypot: 'Leave this field empty',
+            contactSend: 'Send message',
+            contactSending: 'Sending…',
+            contactSent: 'Message sent! I will get back to you as soon as possible.',
+            contactInvalid: 'Please check the fields: a name, a valid email and a message of at least 10 characters.',
+            contactCaptcha: 'Please complete the verification before sending.',
+            contactFailed: 'The message could not be sent. You can write to me directly at ',
+            contactOr: 'You can also write to me at ',
+            contactSubject: 'Contact from josejordan.dev'
         }
     };
 
@@ -322,8 +366,9 @@
         win.el.classList.toggle('maximized');
         const button = win.el.querySelector('[data-action="maximize"]');
         if (button) {
-            button.setAttribute('aria-label', isMaximized(win) ? T.restoreLabel : T.maximizeLabel);
+            const labels = isMaximized(win) ? T.restoreLabel : T.maximizeLabel;
             button.title = isMaximized(win) ? T.restore : T.maximize;
+            button.setAttribute('aria-label', labels[win.id] || button.title);
         }
         if (win.hooks.onShow) win.hooks.onShow();
     }
@@ -417,12 +462,257 @@
         }
     });
 
+    const projectsWindow = registerWindow('projects', {
+        onShow: () => {
+            const container = $('projects-body');
+            if (container && !container.firstChild) renderProjects(container);
+        }
+    });
+
+    let contactForm = null;
+    const contactWindow = registerWindow('contact', {
+        onShow: () => {
+            const container = $('contact-body');
+            if (container && !contactForm) contactForm = renderContactForm(container);
+            if (contactForm) contactForm.show();
+        }
+    });
+
     function openTerminal() {
         openWindow(terminalWindow);
     }
 
     function closeTerminal() {
         closeWindow(terminalWindow);
+    }
+
+    /* ---------- Ventana de proyectos ---------- */
+
+    function projectDesc(project) {
+        return typeof project.desc === 'string' ? project.desc : (project.desc[LANG] || project.desc.es || '');
+    }
+
+    function renderProjects(container) {
+        const projects = site.projects || [];
+        const grid = el('ul', 'pj-grid');
+        const cards = projects.map((project, i) => {
+            const actions = [link(project.url, T.projectCode)];
+            if (project.demo) actions.push(link(project.demo, T.projectDemo));
+            const card = el('li', 'pj-card', [
+                el('div', 'pj-head', [el('span', 'pj-num', String(i + 1).padStart(2, '0')), el('h3', 'pj-name', project.name)]),
+                el('span', 'tag', project.lang),
+                el('p', 'pj-desc', projectDesc(project)),
+                el('div', 'pj-actions', actions)
+            ]);
+            card.dataset.lang = project.lang || '';
+            grid.append(card);
+            return card;
+        });
+
+        const parts = [el('p', 'pj-intro', T.projectsIntro)];
+        const languages = [...new Set(projects.map((project) => project.lang).filter(Boolean))];
+        if (languages.length > 1) {
+            const filters = el('div', 'pj-filters');
+            filters.setAttribute('role', 'group');
+            filters.setAttribute('aria-label', T.projectsFilter);
+            const buttons = [['', T.projectsAll], ...languages.map((lang) => [lang, lang])].map(([value, label]) => {
+                const button = el('button', 'pj-filter', label);
+                button.type = 'button';
+                button.setAttribute('aria-pressed', String(!value));
+                button.addEventListener('click', () => {
+                    buttons.forEach((other) => other.setAttribute('aria-pressed', String(other === button)));
+                    cards.forEach((card) => { card.hidden = Boolean(value) && card.dataset.lang !== value; });
+                });
+                return button;
+            });
+            filters.append(...buttons);
+            parts.push(filters);
+        }
+        parts.push(grid);
+        if (links.github) parts.push(el('p', 'pj-more muted', [T.projectsMore, link(links.github, shortUrl(links.github))]));
+        container.replaceChildren(...parts);
+    }
+
+    /* ---------- Ventana de contacto ---------- */
+
+    const CONTACT_ENDPOINT = '/api/contact';
+    const TURNSTILE_SCRIPT = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+
+    function mailtoLink(subject, message) {
+        let href = 'mailto:' + links.email + '?subject=' + encodeURIComponent(subject);
+        if (message) href += '&body=' + encodeURIComponent(message);
+        return link(href, links.email);
+    }
+
+    function renderContactForm(container) {
+        const siteKey = site.turnstileSiteKey || '';
+        const form = el('form', 'cf');
+        form.noValidate = true;
+
+        function field(name, label, control) {
+            control.name = name;
+            control.id = 'cf-' + name;
+            const labelNode = el('label', 'cf-label', label);
+            labelNode.htmlFor = control.id;
+            return el('div', 'cf-field', [labelNode, control]);
+        }
+
+        function textInput(type, maxLength, autocomplete) {
+            const node = el('input', 'cf-input');
+            node.type = type;
+            node.maxLength = maxLength;
+            node.required = true;
+            node.autocomplete = autocomplete;
+            return node;
+        }
+
+        const nameField = textInput('text', 100, 'name');
+        const emailField = textInput('email', 254, 'email');
+        emailField.spellcheck = false;
+        const messageField = el('textarea', 'cf-input cf-message');
+        messageField.required = true;
+        messageField.minLength = 10;
+        messageField.maxLength = 5000;
+        messageField.rows = 6;
+
+        /* Trampa para bots: los humanos no ven este campo */
+        const trap = textInput('text', 100, 'off');
+        trap.required = false;
+        trap.tabIndex = -1;
+        const trapField = field('website', T.contactHoneypot, trap);
+        trapField.className = 'cf-trap';
+        trapField.setAttribute('aria-hidden', 'true');
+
+        const captchaBox = el('div', 'cf-captcha');
+        const submit = el('button', 'cf-submit', T.contactSend);
+        submit.type = 'submit';
+        const status = el('p', 'cf-status');
+        status.setAttribute('role', 'status');
+        status.setAttribute('aria-live', 'polite');
+
+        form.append(
+            field('name', T.contactName, nameField),
+            field('email', T.contactEmail, emailField),
+            field('message', T.contactMessage, messageField),
+            trapField,
+            captchaBox,
+            el('div', 'cf-actions', [submit]),
+            status
+        );
+
+        const aside = links.email ? el('p', 'cf-aside muted', [T.contactOr, mailtoLink(T.contactSubject), '.']) : null;
+        container.replaceChildren(el('p', 'cf-intro', T.contactIntro), form);
+        if (aside) container.append(aside);
+
+        let openedAt = Date.now();
+        let sending = false;
+        let captchaToken = '';
+        let captchaWidget = null;
+
+        function setStatus(content, kind) {
+            status.className = 'cf-status' + (kind ? ' is-' + kind : '');
+            status.replaceChildren();
+            append(status, content);
+        }
+
+        /* Sin servidor de correo (desarrollo local, variante Workers o fallo): se ofrece el email con el mensaje ya escrito */
+        function failure() {
+            setStatus([T.contactFailed, links.email ? mailtoLink(T.contactSubject, messageField.value.trim()) : '', '.'], 'error');
+        }
+
+        function loadCaptcha() {
+            if (!siteKey || captchaWidget) return;
+            captchaWidget = 'loading';
+            const render = () => {
+                captchaWidget = window.turnstile.render(captchaBox, {
+                    sitekey: siteKey,
+                    theme: 'dark',
+                    language: LANG,
+                    callback: (token) => { captchaToken = token; },
+                    'expired-callback': () => { captchaToken = ''; },
+                    'error-callback': () => { captchaToken = ''; }
+                });
+            };
+            if (window.turnstile) return render();
+            const script = document.createElement('script');
+            script.src = TURNSTILE_SCRIPT;
+            script.async = true;
+            script.addEventListener('load', render);
+            script.addEventListener('error', () => { captchaWidget = null; });
+            document.head.append(script);
+        }
+
+        function resetCaptcha() {
+            captchaToken = '';
+            if (captchaWidget && captchaWidget !== 'loading' && window.turnstile) window.turnstile.reset(captchaWidget);
+        }
+
+        function valid() {
+            const name = nameField.value.trim();
+            const email = emailField.value.trim();
+            const message = messageField.value.trim();
+            return name.length > 0 && name.length <= 100 && emailField.validity.valid && /\S+@\S+\.\S+/.test(email) && message.length >= 10 && message.length <= 5000;
+        }
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            if (sending) return;
+            if (!valid()) {
+                setStatus(T.contactInvalid, 'error');
+                return;
+            }
+            if (siteKey && !captchaToken) {
+                setStatus(T.contactCaptcha, 'error');
+                return;
+            }
+            sending = true;
+            submit.disabled = true;
+            setStatus(T.contactSending);
+            try {
+                const response = await fetch(CONTACT_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: nameField.value.trim(),
+                        email: emailField.value.trim(),
+                        message: messageField.value.trim(),
+                        website: trap.value,
+                        elapsed: Date.now() - openedAt,
+                        token: captchaToken,
+                        lang: LANG
+                    })
+                });
+                const result = await response.json().catch(() => ({}));
+                if (response.ok && result.ok) {
+                    form.reset();
+                    openedAt = Date.now();
+                    setStatus(T.contactSent, 'ok');
+                } else if (result.error === 'invalid') {
+                    setStatus(T.contactInvalid, 'error');
+                } else if (result.error === 'captcha') {
+                    setStatus(T.contactCaptcha, 'error');
+                } else {
+                    failure();
+                }
+            } catch (error) {
+                failure();
+            } finally {
+                sending = false;
+                submit.disabled = false;
+                resetCaptcha();
+            }
+        });
+
+        return {
+            show() {
+                loadCaptcha();
+                if (!touchLike.matches) (nameField.value ? messageField : nameField).focus({ preventScroll: true });
+            },
+            prefill(message) {
+                messageField.value = message;
+                if (!touchLike.matches) (nameField.value ? messageField : nameField).focus({ preventScroll: true });
+            }
+        };
     }
 
     /* ---------- Salida ---------- */
@@ -506,8 +796,7 @@
     define('projects', (out) => {
         const list = el('ol', 'projects');
         (site.projects || []).forEach((project) => {
-            const desc = typeof project.desc === 'string' ? project.desc : (project.desc[LANG] || project.desc.es || '');
-            list.append(el('li', null, [link(project.url, project.name), el('span', 'tag', project.lang), el('br'), desc]));
+            list.append(el('li', null, [link(project.url, project.name), el('span', 'tag', project.lang), el('br'), projectDesc(project)]));
         });
         out.node(list);
         out.muted(T.projectsHint());
@@ -540,6 +829,14 @@
         if (links.github) add('GitHub', links.github, shortUrl(links.github));
         if (links.twitter) add('X', links.twitter, links.twitterHandle || shortUrl(links.twitter));
         out.node(rows);
+        if (contactWindow) out.muted(T.contactHint());
+    });
+
+    define('mail', (out, args, argText) => {
+        if (!contactWindow) return;
+        out.line(T.mailOpened);
+        openWindow(contactWindow);
+        if (argText && contactForm) contactForm.prefill(argText);
     });
 
     define('cv', (out) => {
@@ -675,7 +972,7 @@
     const aliases = {
         ayuda: 'help', habilidades: 'skills', proyectos: 'projects', experiencia: 'experience', formacion: 'education', 'formación': 'education',
         contacto: 'contact', idioma: 'lang', buscaminas: 'minesweeper', mines: 'minesweeper', adivina: 'guess', limpiar: 'clear', fecha: 'date',
-        salir: 'exit', language: 'lang', resume: 'cv'
+        salir: 'exit', language: 'lang', resume: 'cv', mensaje: 'mail', message: 'mail', email: 'mail'
     };
     Object.entries(aliases).forEach(([name, targetName]) => {
         const command = commands.get(targetName);

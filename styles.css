@@ -259,6 +259,22 @@ body {
     max-height: calc(100vh - var(--menubar-h) - var(--dock-space) - 24px);
 }
 
+.app-projects {
+    left: 50%;
+    top: calc(50% + (var(--menubar-h) - var(--dock-space)) / 2);
+    transform: translate(calc(-50% + 96px), calc(-50% + 12px));
+    width: min(820px, calc(100vw - 196px));
+    height: min(600px, calc(100vh - var(--menubar-h) - var(--dock-space) - 24px));
+}
+
+.app-contact {
+    left: 50%;
+    top: calc(50% + (var(--menubar-h) - var(--dock-space)) / 2);
+    transform: translate(calc(-50% + 72px), calc(-50% + 16px));
+    width: min(520px, calc(100vw - 196px));
+    max-height: calc(100vh - var(--menubar-h) - var(--dock-space) - 24px);
+}
+
 .window.is-positioned { transform: none; }
 .window.is-dragging { transition: none; box-shadow: var(--shadow), 0 0 0 1px rgba(233, 196, 106, 0.35); }
 .window.is-closed,
@@ -601,6 +617,163 @@ body {
 
 .ms-status { min-height: 1.5em; }
 
+/* ---------- Proyectos ---------- */
+
+.app-projects .window-body,
+.app-contact .window-body {
+    padding: 18px 20px 20px;
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+.app-projects p,
+.app-contact p { margin: 0; }
+
+.app-projects a,
+.app-contact a {
+    color: var(--sky);
+    text-underline-offset: 3px;
+    text-decoration-color: rgba(140, 207, 224, 0.45);
+}
+
+.app-projects a:hover,
+.app-contact a:hover { text-decoration-color: currentColor; }
+
+.app-projects a:focus-visible,
+.app-contact a:focus-visible,
+.pj-filter:focus-visible,
+.cf-submit:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+.pj-intro,
+.cf-intro { color: var(--ink-muted); margin-bottom: 14px !important; }
+
+.pj-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 14px;
+}
+
+.pj-filter {
+    appearance: none;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: transparent;
+    color: var(--ink-muted);
+    font: 500 12px/1 var(--font-mono);
+    padding: 6px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+}
+
+.pj-filter:hover { color: var(--ink); border-color: rgba(255, 255, 255, 0.25); }
+
+.pj-filter[aria-pressed="true"] {
+    color: var(--term-bg);
+    background: var(--gold);
+    border-color: var(--gold);
+}
+
+.pj-grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 12px;
+}
+
+.pj-card {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 14px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.035);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+    transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.pj-card:hover { background: rgba(255, 255, 255, 0.06); box-shadow: inset 0 0 0 1px rgba(233, 196, 106, 0.3); }
+.pj-card[hidden] { display: none; }
+
+.pj-head { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.pj-num { color: var(--accent); font-weight: 700; font-size: 12px; }
+
+.pj-name {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--gold);
+    overflow-wrap: anywhere;
+}
+
+.pj-card .tag { margin: 0; }
+.pj-desc { flex: 1; color: var(--ink); }
+.pj-actions { display: flex; gap: 14px; margin-top: 4px; font-weight: 600; }
+.pj-more { margin-top: 16px !important; }
+
+/* ---------- Contacto ---------- */
+
+.cf { display: flex; flex-direction: column; gap: 12px; }
+.cf-field { display: flex; flex-direction: column; gap: 5px; }
+.cf-label { color: var(--ink-muted); font-size: 12px; }
+
+.cf-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 9px 11px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.22);
+    color: var(--ink);
+    font: 13px/1.5 var(--font-mono);
+    caret-color: var(--accent);
+}
+
+.cf-input:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(233, 196, 106, 0.18);
+}
+
+.cf-message { resize: vertical; min-height: 110px; }
+
+/* Campo trampa para bots: fuera de la vista pero presente en el formulario */
+.cf-trap {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+
+.cf-captcha:empty { display: none; }
+.cf-actions { display: flex; justify-content: flex-end; }
+
+.cf-submit {
+    appearance: none;
+    border: 0;
+    border-radius: 8px;
+    padding: 10px 16px;
+    background: var(--accent);
+    color: #1b1024;
+    font: 700 13px/1 var(--font-mono);
+    cursor: pointer;
+}
+
+.cf-submit:hover { filter: brightness(1.08); }
+.cf-submit:disabled { opacity: 0.6; cursor: progress; }
+
+.cf-status:empty { display: none; }
+.cf-status.is-ok { color: #7ee2a8; }
+.cf-status.is-error { color: var(--error); }
+.cf-status a { overflow-wrap: anywhere; }
+.cf-aside { margin-top: 16px !important; font-size: 12px; }
+
 /* ---------- Salida ---------- */
 
 .terminal-output p,
@@ -817,6 +990,11 @@ ol.projects li::marker { color: var(--ink-muted); }
 
     .dock-item { padding: 5px 12px 8px 8px; }
 
+    .app-projects .window-body,
+    .app-contact .window-body { padding: 14px; font-size: 14px; }
+    .pj-grid { grid-template-columns: 1fr; }
+    .cf-input { font-size: 16px; }   /* evita el zoom automático de iOS al enfocar */
+
     .app-minesweeper .window-body { padding: 10px; --ms-cell: 34px; }
     .ms-grid { margin: 0 auto; }
     .ms-status, .ms-best { max-width: none; }
@@ -824,4 +1002,20 @@ ol.projects li::marker { color: var(--ink-muted); }
     .desktop-note { bottom: auto; top: calc(var(--menubar-h) + var(--icons-h) + 24px); }
 
     .page-404 .terminal { top: calc(var(--menubar-h) + 24px) !important; bottom: auto; height: auto !important; }
+}
+
+/* Con cuatro apps en el dock no caben las etiquetas en pantallas estrechas */
+@media (max-width: 520px) {
+    .dock { gap: 2px; }
+    .dock-item { padding: 6px 14px 9px; }
+    .dock-label {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+    }
+    .dock-icon { width: 26px; height: 26px; }
+    .dock-icon svg { width: 16px; height: 16px; }
 }

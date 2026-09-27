@@ -1,6 +1,7 @@
 # Cabeceras servidas por Cloudflare (Pages y Workers con assets estáticos).
 # Nota: si activas Rocket Loader o cualquier script inyectado por Cloudflare,
-# amplía la CSP o desactiva esa opción; solo se permite el beacon de Web Analytics.
+# amplía la CSP o desactiva esa opción; solo se permite el beacon de Web Analytics
+# y Turnstile (challenges.cloudflare.com) para el captcha del formulario de contacto.
 
 /*
   X-Content-Type-Options: nosniff
@@ -9,7 +10,7 @@
   Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()
   Cross-Origin-Opener-Policy: same-origin
   Strict-Transport-Security: max-age=31536000
-  Content-Security-Policy: default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; connect-src 'self' https://cloudflareinsights.com; style-src 'self'; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://static.cloudflareinsights.com https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; connect-src 'self' https://cloudflareinsights.com; style-src 'self'; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
 
 /fonts/*
   Cache-Control: public, max-age=31536000, immutable

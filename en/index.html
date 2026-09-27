@@ -69,7 +69,7 @@
     <!-- Icons: Feather Icons (MIT), https://feathericons.com -->
     <div class="desktop" id="desktop">
         <nav class="desktop-icons" aria-label="Desktop">
-            <button class="icon" type="button" data-command="projects">
+            <button class="icon" type="button" data-open="projects">
                 <span class="icon-tile icon-folder" aria-hidden="true">
                     <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
                 </span>
@@ -81,7 +81,7 @@
                 </span>
                 <span class="icon-label">CV</span>
             </button>
-            <button class="icon" type="button" data-command="contact">
+            <button class="icon" type="button" data-open="contact">
                 <span class="icon-tile icon-mail" aria-hidden="true">
                     <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg>
                 </span>
@@ -149,6 +149,29 @@
         <div class="window-body" id="minesweeper-body"></div>
     </section>
 
+    <section class="window app-projects is-closed" id="projects" aria-label="Projects">
+        <div class="window-header">
+            <div class="traffic-lights">
+                <button class="light close" type="button" data-action="close" title="Close" aria-label="Close Projects"></button>
+                <button class="light minimize" type="button" data-action="minimize" title="Minimize" aria-label="Minimize Projects"></button>
+                <button class="light maximize" type="button" data-action="maximize" title="Maximize" aria-label="Maximize Projects"></button>
+            </div>
+            <span class="window-title">~/projects</span>
+        </div>
+        <div class="window-body" id="projects-body"></div>
+    </section>
+
+    <section class="window app-contact is-closed" id="contact" aria-label="Contact">
+        <div class="window-header">
+            <div class="traffic-lights">
+                <button class="light close" type="button" data-action="close" title="Close" aria-label="Close Contact"></button>
+                <button class="light minimize" type="button" data-action="minimize" title="Minimize" aria-label="Minimize Contact"></button>
+            </div>
+            <span class="window-title">Send a message</span>
+        </div>
+        <div class="window-body" id="contact-body"></div>
+    </section>
+
     <nav class="dock" aria-label="Dock">
         <button class="dock-item" type="button" data-window="terminal">
             <span class="dock-icon icon-terminal" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 17l6-6-6-6M12 19h8"/></svg></span>
@@ -157,6 +180,14 @@
         <button class="dock-item" type="button" data-window="minesweeper">
             <span class="dock-icon icon-mines" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="6"/><path d="M12 3v4M12 19v2M3 13h4M17 13h4M6 7l2.5 2.5M15.5 9.5L18 7M6 19l2.5-2.5M15.5 16.5L18 19"/></svg></span>
             <span class="dock-label">Minesweeper</span>
+        </button>
+        <button class="dock-item" type="button" data-window="projects">
+            <span class="dock-icon icon-folder" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span>
+            <span class="dock-label">Projects</span>
+        </button>
+        <button class="dock-item" type="button" data-window="contact">
+            <span class="dock-icon icon-mail" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg></span>
+            <span class="dock-label">Contact</span>
         </button>
     </nav>
 </body>

@@ -15,6 +15,10 @@ const CONTENT = Object.freeze({
     cvUrl: 'cv-jose-jordan.pdf',
     cvUrlEn: '',
 
+    // Clave pública (site key) de Cloudflare Turnstile para el formulario de contacto.
+    // Vacía = sin captcha. Si la rellenas, define también el secreto TURNSTILE_SECRET_KEY en Cloudflare Pages.
+    turnstileSiteKey: '',
+
     links: {
         email: 'info@josejordan.dev',
         github: 'https://github.com/mundodigitalpro',
@@ -24,6 +28,7 @@ const CONTENT = Object.freeze({
     },
 
     // Proyectos públicos de GitHub. El número de orden se usa en "open <n>".
+    // Se muestran en el comando "projects" y en la ventana Proyectos. Campo opcional: demo (URL de una demo en vivo).
     projects: [
         {
             name: 'KotlinNativeClaudeChat',

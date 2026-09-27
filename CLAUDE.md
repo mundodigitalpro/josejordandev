@@ -8,14 +8,15 @@ Personal portfolio website for Jose Jordan (full-stack developer in Córdoba, Sp
 
 ## Architecture
 
-Static site: HTML, CSS and vanilla JavaScript. No build step, no package manager, no external dependencies (the font is self-hosted).
+Static site: HTML, CSS and vanilla JavaScript. No build step, no package manager, no external dependencies (the font is self-hosted). The only server code is one Cloudflare Pages Function for the contact form (`functions/api/contact.js`).
 
 ### Files
-- **index.html** (Spanish) and **en/index.html** (English): desktop (menu bar with ES/EN switch and clock, icons, dock), the terminal window and the Minesweeper window, with SEO metadata, `hreflang` alternates, Open Graph tags and JSON-LD. Both files share the same structure; structural changes must be applied to both (only text differs). Both use absolute paths (`/styles.css`, `/script.js`), so serve the site with a local server rather than opening the files directly.
+- **index.html** (Spanish) and **en/index.html** (English): desktop (menu bar with ES/EN switch and clock, icons, dock), the terminal window and the Projects, Contact and Minesweeper windows, with SEO metadata, `hreflang` alternates, Open Graph tags and JSON-LD. Both files share the same structure; structural changes must be applied to both (only text differs). Both use absolute paths (`/styles.css`, `/script.js`), so serve the site with a local server rather than opening the files directly.
 - **lang.js**: loaded in `<head>` without `defer`. On the two home pages it redirects to the language saved in `localStorage` (`lang`) or, if none, to the first browser language that is Spanish or English (English otherwise). Crawlers (Googlebot, Bingbot, social previews, Lighthouse) are never redirected.
-- **content.js**: all editable content. Shared data (`links`, `projects` with `desc.es`/`desc.en`, `cvUrl`, optional `cvUrlEn`) plus `text.es` and `text.en` (about, skills, experience, education, certifications, jokes, quotes). Defines a global `CONTENT` object. Edit this file to update what the terminal shows, in both languages.
-- **script.js**: desktop and terminal logic. It contains a small window manager (`registerWindow`: drag, focus/z-order, minimize to the dock, close, maximize where a maximize button exists) and the dock (`.dock-item[data-window]` launchers with running/minimized/active states). Windows are `.window` elements with `.window-header`, `.window-title`, `.window-body` and `[data-action]` buttons; desktop icons open them with `data-open`. The language comes from `<html lang>`; interface strings live in the `UI` dictionary (es/en) inside the file.
+- **content.js**: all editable content. Shared data (`links`, `projects` with `desc.es`/`desc.en` and optional `demo`, `cvUrl`, optional `cvUrlEn`, optional `turnstileSiteKey`) plus `text.es` and `text.en` (about, skills, experience, education, certifications, jokes, quotes). Defines a global `CONTENT` object. Edit this file to update what the terminal shows, in both languages.
+- **script.js**: desktop and terminal logic. It contains a small window manager (`registerWindow`: drag, focus/z-order, minimize to the dock, close, maximize where a maximize button exists) and the dock (`.dock-item[data-window]` launchers with running/minimized/active states). Windows are `.window` elements with `.window-header`, `.window-title`, `.window-body` and `[data-action]` buttons; desktop icons open them with `data-open`. The language comes from `<html lang>`; interface strings live in the `UI` dictionary (es/en) inside the file. It also renders the Projects window (cards from `CONTENT.projects` with language filters) and the Contact window (form posted as JSON to `/api/contact`; honeypot field, elapsed time, optional Turnstile widget loaded only when `turnstileSiteKey` is set; if the endpoint fails or is missing it offers a `mailto:` link with the message prefilled).
 - **minesweeper.js**: the Minesweeper game (`Minesweeper.mount(container, lang)`), mounted lazily the first time its window opens. Three levels, first click always safe, flags with right click, long press or the flag-mode toggle, keyboard navigation (arrows, Enter, F), best times in `localStorage` (`ms-best-<level>`). `Minesweeper.last.state()` exposes the board for tests. Commands are registered with `define(name, run, { hidden, description })` and take their description from `UI[lang].desc`; output is built with DOM nodes (never `innerHTML` with user input). Also handles history (↑/↓), Tab completion, unknown-command suggestions, the draggable/minimizable/maximizable window (Pointer Events), desktop icons, and the menu bar clock.
+- **functions/api/contact.js**: Pages Function for `POST /api/contact`. Validates the fields, checks the Origin, silently drops bots (honeypot or sent in under 3 s), verifies Turnstile when `TURNSTILE_SECRET_KEY` is set and sends the email with the Resend API (`RESEND_API_KEY`; optional `CONTACT_TO`, `CONTACT_FROM`). Without `RESEND_API_KEY` it answers 503 and the page falls back to `mailto:`. Only Pages runs it; the Workers variant has no endpoint (the form then uses the fallback).
 - **styles.css**: design tokens in `:root`, wallpaper (CSS gradients plus an inline SVG pattern of horseshoe arches), icons, terminal window, mobile layout (`max-width: 720px`), reduced-motion support.
 - **404.html**: custom not-found page (uses absolute paths to `/styles.css`).
 - **privacy.html** + **privacy.css**: privacy policy for the mobile apps. Legal text must stay intact.
@@ -25,15 +26,15 @@ Static site: HTML, CSS and vanilla JavaScript. No build step, no package manager
 - **robots.txt**, **sitemap.xml**.
 
 ### Terminal commands
-Visible in `help`: `help`, `about`, `skills`, `projects`, `experience`, `education`, `contact`, `cv`, `open`, `lang`, `minesweeper` (opens the game window), `guess` (guess-the-number game inside the terminal; while it runs the prompt is `?` and input goes to the game), `clear`, `history`, `date`, `echo`, `joke`, `quote`. Command names are the same in both languages; `lang en` / `lang es` switches the version and saves the choice.
-Hidden extras: `whoami`, `hostname`, `pwd`, `ls`, `cat`, `sudo`, `exit`, `hola`, `hello`, plus aliases (`ayuda`, `habilidades`, `proyectos`, `experiencia`, `formacion`, `contacto`, `idioma`, `buscaminas`, `mines`, `adivina`, `limpiar`, `fecha`, `salir`, `language`, `resume`).
+Visible in `help`: `help`, `about`, `skills`, `projects`, `experience`, `education`, `contact`, `mail` (opens the contact form window; `mail <text>` prefills the message), `cv`, `open`, `lang`, `minesweeper` (opens the game window), `guess` (guess-the-number game inside the terminal; while it runs the prompt is `?` and input goes to the game), `clear`, `history`, `date`, `echo`, `joke`, `quote`. Command names are the same in both languages; `lang en` / `lang es` switches the version and saves the choice.
+Hidden extras: `whoami`, `hostname`, `pwd`, `ls`, `cat`, `sudo`, `exit`, `hola`, `hello`, plus aliases (`ayuda`, `habilidades`, `proyectos`, `experiencia`, `formacion`, `contacto`, `idioma`, `buscaminas`, `mines`, `adivina`, `limpiar`, `fecha`, `salir`, `language`, `resume`, `mensaje`, `message`, `email`).
 
 ## Cloudflare hosting
 
 - The domain **josejordan.dev is served by Cloudflare Pages** (project `josejordandev`, connected to GitHub; every push to `main` deploys; no build command; output directory is the repo root).
 - **wrangler.jsonc** is a Workers configuration (static assets). Pages ignores it (no `pages_build_output_dir`). It allows an alternative deployment with `npx wrangler deploy`.
-- **_headers**: security headers including a strict Content-Security-Policy (`script-src 'self'`, `style-src 'self'`). Do not add inline `<script>` or `<style>` blocks or inline `style=""` attributes; put JS/CSS in files. JSON-LD blocks are fine.
-- **_redirects**: redirects repository files (CLAUDE.md, README.md, wrangler.jsonc, .gitignore, .assetsignore) to `/` so they are not exposed on Pages.
+- **_headers**: security headers including a strict Content-Security-Policy (`script-src 'self'`, `style-src 'self'`; `challenges.cloudflare.com` is allowed in `script-src` and `frame-src` for Turnstile). Do not add inline `<script>` or `<style>` blocks or inline `style=""` attributes; put JS/CSS in files. JSON-LD blocks are fine.
+- **_redirects**: redirects repository files (CLAUDE.md, README.md, wrangler.jsonc, .gitignore, .assetsignore, functions/) to `/` so they are not exposed on Pages.
 - **.assetsignore**: excludes the same files from Workers static asset uploads.
 - **404.html** (bilingual) is served for unknown paths (Pages does this automatically; Workers via `not_found_handling: "404-page"`).
 - **sitemap.xml** lists `/`, `/en/` (with `xhtml:link` alternates) and `/privacy`. The privacy policy exists only in Spanish.
@@ -42,7 +43,7 @@ Hidden extras: `whoami`, `hostname`, `pwd`, `ls`, `cat`, `sudo`, `exit`, `hola`,
 
 Any static server works:
 - `python3 -m http.server 8000`
-- `npx wrangler pages dev .` reproduces Pages behaviour (headers, redirects, 404).
+- `npx wrangler pages dev .` reproduces Pages behaviour (headers, redirects, 404, and the contact Function; pass secrets with `--binding RESEND_API_KEY=...` or a `.dev.vars` file).
 - `npx wrangler dev` reproduces the Workers variant.
 
 ## Contact Information
