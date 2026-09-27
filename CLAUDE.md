@@ -8,7 +8,7 @@ Personal portfolio website for Jose Jordan (full-stack developer in Córdoba, Sp
 
 ## Architecture
 
-Static site: HTML, CSS and vanilla JavaScript. No build step, no package manager, no external dependencies (the font is self-hosted). The only server code is one Cloudflare Pages Function for the contact form (`functions/api/contact.js`).
+Static site: HTML, CSS and vanilla JavaScript. No build step, no package manager, no external dependencies (the font is self-hosted). The only server code is a small Cloudflare Worker (`worker/`) that serves the static files and handles the contact form with Email Routing.
 
 ### Files
 - **index.html** (Spanish) and **en/index.html** (English): desktop (menu bar with ES/EN switch and clock, icons, dock), the terminal window and the Projects, Contact and Minesweeper windows, with SEO metadata, `hreflang` alternates, Open Graph tags and JSON-LD. Both files share the same structure; structural changes must be applied to both (only text differs). Both use absolute paths (`/styles.css`, `/script.js`), so serve the site with a local server rather than opening the files directly.
@@ -16,7 +16,7 @@ Static site: HTML, CSS and vanilla JavaScript. No build step, no package manager
 - **content.js**: all editable content. Shared data (`links`, `projects` with `desc.es`/`desc.en` and optional `demo`, `cvUrl`, optional `cvUrlEn`, optional `turnstileSiteKey`) plus `text.es` and `text.en` (about, skills, experience, education, certifications, jokes, quotes). Defines a global `CONTENT` object. Edit this file to update what the terminal shows, in both languages.
 - **script.js**: desktop and terminal logic. It contains a small window manager (`registerWindow`: drag, focus/z-order, minimize to the dock, close, maximize where a maximize button exists) and the dock (`.dock-item[data-window]` launchers with running/minimized/active states). Windows are `.window` elements with `.window-header`, `.window-title`, `.window-body` and `[data-action]` buttons; desktop icons open them with `data-open`. The language comes from `<html lang>`; interface strings live in the `UI` dictionary (es/en) inside the file. It also renders the Projects window (cards from `CONTENT.projects` with language filters) and the Contact window (form posted as JSON to `/api/contact`; honeypot field, elapsed time, optional Turnstile widget loaded only when `turnstileSiteKey` is set; if the endpoint fails or is missing it offers a `mailto:` link with the message prefilled).
 - **minesweeper.js**: the Minesweeper game (`Minesweeper.mount(container, lang)`), mounted lazily the first time its window opens. Three levels, first click always safe, flags with right click, long press or the flag-mode toggle, keyboard navigation (arrows, Enter, F), best times in `localStorage` (`ms-best-<level>`). `Minesweeper.last.state()` exposes the board for tests. Commands are registered with `define(name, run, { hidden, description })` and take their description from `UI[lang].desc`; output is built with DOM nodes (never `innerHTML` with user input). Also handles history (↑/↓), Tab completion, unknown-command suggestions, the draggable/minimizable/maximizable window (Pointer Events), desktop icons, and the menu bar clock.
-- **functions/api/contact.js**: Pages Function for `POST /api/contact`. Validates the fields, checks the Origin, silently drops bots (honeypot or sent in under 3 s), verifies Turnstile when `TURNSTILE_SECRET_KEY` is set and sends the email with the Resend API (`RESEND_API_KEY`; optional `CONTACT_TO`, `CONTACT_FROM`). Without `RESEND_API_KEY` it answers 503 and the page falls back to `mailto:`. Only Pages runs it; the Workers variant has no endpoint (the form then uses the fallback).
+- **worker/index.js** + **worker/contact.js**: Worker entry (`main` in wrangler.jsonc). `/api/contact` runs first (`run_worker_first`); everything else goes to `env.ASSETS`. `handleContact(request, env, send)` validates the fields, checks the Origin, silently drops bots (honeypot or sent in under 3 s), verifies Turnstile when `TURNSTILE_SECRET_KEY` is set, builds a plain-text UTF-8 MIME message by hand (no libraries) and sends it through the `send_email` binding `MAILER` (Cloudflare Email Routing) to `CONTACT_TO` (a secret: an Email Routing verified address; it must not be committed), from `CONTACT_FROM` (default `web@josejordan.dev`), with `Reply-To` set to the visitor. Without `CONTACT_TO` it answers 503 and the page falls back to `mailto:`. `send` is injected so `contact.js` can be tested outside Cloudflare.
 - **styles.css**: design tokens in `:root`, wallpaper (CSS gradients plus an inline SVG pattern of horseshoe arches), icons, terminal window, mobile layout (`max-width: 720px`), reduced-motion support.
 - **404.html**: custom not-found page (uses absolute paths to `/styles.css`).
 - **privacy.html** + **privacy.css**: privacy policy for the mobile apps. Legal text must stay intact.
@@ -31,11 +31,11 @@ Hidden extras: `whoami`, `hostname`, `pwd`, `ls`, `cat`, `sudo`, `exit`, `hola`,
 
 ## Cloudflare hosting
 
-- The domain **josejordan.dev is served by Cloudflare Pages** (project `josejordandev`, connected to GitHub; every push to `main` deploys; no build command; output directory is the repo root).
-- **wrangler.jsonc** is a Workers configuration (static assets). Pages ignores it (no `pages_build_output_dir`). It allows an alternative deployment with `npx wrangler deploy`.
+- **Target: Cloudflare Workers** (`wrangler.jsonc`: worker `josejordan-portfolio`, `main: worker/index.js`, static assets from the repo root, `send_email` binding `MAILER`). Deploy with Workers Builds connected to GitHub or `npx wrangler deploy`. The contact form only works here, because Pages Functions cannot use `send_email`.
+- **Legacy: Cloudflare Pages** (project `josejordandev`, connected to GitHub; every push to `main` deploys; output directory is the repo root). Until the domain moves to the Worker, josejordan.dev is served from Pages: the site works the same but `/api/contact` does not exist, so the form falls back to `mailto:`. Pages ignores wrangler.jsonc.
 - **_headers**: security headers including a strict Content-Security-Policy (`script-src 'self'`, `style-src 'self'`; `challenges.cloudflare.com` is allowed in `script-src` and `frame-src` for Turnstile). Do not add inline `<script>` or `<style>` blocks or inline `style=""` attributes; put JS/CSS in files. JSON-LD blocks are fine.
-- **_redirects**: redirects repository files (CLAUDE.md, README.md, wrangler.jsonc, .gitignore, .assetsignore, functions/) to `/` so they are not exposed on Pages.
-- **.assetsignore**: excludes the same files from Workers static asset uploads.
+- **_redirects**: redirects repository files (CLAUDE.md, README.md, wrangler.jsonc, .gitignore, .assetsignore, worker/) to `/` so they are not exposed on Pages.
+- **.assetsignore**: excludes the same files (plus `.dev.vars`) from Workers static asset uploads.
 - **404.html** (bilingual) is served for unknown paths (Pages does this automatically; Workers via `not_found_handling: "404-page"`).
 - **sitemap.xml** lists `/`, `/en/` (with `xhtml:link` alternates) and `/privacy`. The privacy policy exists only in Spanish.
 
@@ -43,8 +43,8 @@ Hidden extras: `whoami`, `hostname`, `pwd`, `ls`, `cat`, `sudo`, `exit`, `hola`,
 
 Any static server works:
 - `python3 -m http.server 8000`
-- `npx wrangler pages dev .` reproduces Pages behaviour (headers, redirects, 404, and the contact Function; pass secrets with `--binding RESEND_API_KEY=...` or a `.dev.vars` file).
-- `npx wrangler dev` reproduces the Workers variant.
+- `npx wrangler dev` runs the Worker (static files, headers, redirects, 404 and `/api/contact`; put `CONTACT_TO=...` in a git-ignored `.dev.vars`). Locally, wrangler simulates `send_email` and writes the message to a file instead of sending it.
+- `npx wrangler pages dev .` reproduces the legacy Pages behaviour (no contact endpoint).
 
 ## Contact Information
 - **Developer**: Jose Jordan

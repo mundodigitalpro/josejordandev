@@ -12,14 +12,14 @@ Sitio estático (HTML, CSS y JavaScript sin dependencias ni proceso de build) al
 | `content.js` | Textos en `text.es` y `text.en`, proyectos y enlaces. **Edita este fichero para actualizar el contenido.** |
 | `script.js` | Escritorio y terminal: gestor de ventanas, dock, comandos, historial, autocompletado y el juego de adivinar el número |
 | `minesweeper.js` | Buscaminas: se abre en su propia ventana desde el icono, el dock o el comando `minesweeper` |
-| `functions/api/contact.js` | Pages Function que recibe el formulario de contacto y lo envía por email con Resend |
+| `worker/index.js`, `worker/contact.js` | Worker: sirve la web y envía el formulario de contacto con Cloudflare Email Routing |
 | `styles.css` | Estilos del escritorio y la terminal |
 | `cv-jose-jordan.pdf` | CV que abren el comando `cv` y el icono CV |
 | `404.html` | Página de error |
 | `privacy.html`, `privacy.css` | Política de privacidad de las apps |
 | `fonts/` | JetBrains Mono (SIL Open Font License) |
 | `_headers`, `_redirects` | Cabeceras de seguridad y redirecciones que aplica Cloudflare |
-| `.assetsignore`, `wrangler.jsonc` | Configuración para desplegar como Cloudflare Worker con assets estáticos |
+| `.assetsignore`, `wrangler.jsonc` | Configuración del Worker (assets estáticos, formulario y binding `send_email`) |
 
 ## Desarrollo local
 
@@ -32,14 +32,14 @@ python3 -m http.server 8000
 Para reproducir el comportamiento de Cloudflare (cabeceras, redirecciones y página 404):
 
 ```bash
+npx wrangler dev              # como Cloudflare Worker (incluye /api/contact; secretos en .dev.vars)
 npx wrangler pages dev .      # como Cloudflare Pages
-npx wrangler dev              # como Cloudflare Worker
 ```
 
 ## Despliegue
 
-- **Cloudflare Pages** (actual): el proyecto `josejordandev` está conectado a este repositorio y publica cada push a `main`. Sin comando de build; directorio de salida `/`.
-- **Cloudflare Workers** (alternativa): `npx wrangler deploy` usando `wrangler.jsonc`.
+- **Cloudflare Workers** (recomendado, necesario para el formulario): `npx wrangler deploy` o Workers Builds conectado a GitHub, usando `wrangler.jsonc`. Ver *Formulario de contacto*.
+- **Cloudflare Pages** (actual hasta migrar): el proyecto `josejordandev` publica cada push a `main`. Sin comando de build; directorio de salida `/`. Todo funciona salvo el envío del formulario (usa `mailto:`).
 
 ## Contenido
 
@@ -56,11 +56,17 @@ Los comandos de la terminal leen de `content.js`:
 
 ## Formulario de contacto
 
-El formulario envía los datos a `/api/contact` (Pages Function en `functions/api/contact.js`), que los reenvía por email con [Resend](https://resend.com).
+El formulario envía los datos a `/api/contact`, que atiende el Worker (`worker/contact.js`) y reenvía por email con **Cloudflare Email Routing**: sin cuentas ni APIs de terceros. Las Pages Functions no pueden enviar correo, así que el formulario solo funciona desplegando la web como Worker.
 
-1. Crea una cuenta en Resend, verifica el dominio `josejordan.dev` (añade los registros DNS que te indique en Cloudflare) y genera una API key.
-2. En Cloudflare Pages > proyecto `josejordandev` > Settings > Variables and Secrets, añade el secreto `RESEND_API_KEY`. Opcionales: `CONTACT_TO` (por defecto `info@josejordan.dev`) y `CONTACT_FROM` (por defecto `josejordan.dev <web@josejordan.dev>`).
-3. Opcional, captcha con Turnstile: crea un widget en Cloudflare > Turnstile para `josejordan.dev`, pon la *site key* en `turnstileSiteKey` (`content.js`) y el secreto en `TURNSTILE_SECRET_KEY`.
-4. Vuelve a desplegar para que la función lea las variables.
+Requisitos: Email Routing activo en `josejordan.dev` (ya lo está si `info@josejordan.dev` te llega al Gmail) y la dirección de destino verificada en *Email Routing > Destination addresses*.
 
-Protección antispam sin captcha: campo trampa oculto, tiempo mínimo de 3 segundos y comprobación del `Origin`. Mientras no haya `RESEND_API_KEY` (o en local con `python3 -m http.server`, o en la variante Workers), el formulario muestra un enlace `mailto:` con el mensaje ya escrito.
+Pasos para mover la web de Pages a Workers:
+
+1. Cloudflare > Workers & Pages > Create > **Import a repository** y elige este repositorio. Sin comando de build; el comando de despliegue es `npx wrangler deploy` (lee `wrangler.jsonc`).
+2. En el Worker `josejordan-portfolio` > Settings > Variables and Secrets, añade el secreto **`CONTACT_TO`** con tu dirección verificada (tu Gmail). No la pongas en el repositorio. Opcional: `CONTACT_FROM` (por defecto `web@josejordan.dev`).
+3. Prueba el formulario en la URL `*.workers.dev` del Worker.
+4. Quita el dominio personalizado `josejordan.dev` del proyecto de Pages (Custom domains) y añádelo al Worker (Settings > Domains & Routes). Después puedes pausar o borrar el proyecto de Pages.
+
+Captcha opcional con Turnstile: crea un widget en Cloudflare > Turnstile para `josejordan.dev`, pon la *site key* en `turnstileSiteKey` (`content.js`) y el secreto en `TURNSTILE_SECRET_KEY`.
+
+Protección antispam sin captcha: campo trampa oculto, tiempo mínimo de 3 segundos y comprobación del `Origin`. Mientras no haya `CONTACT_TO` (o en Pages, o con `python3 -m http.server`), el formulario muestra un enlace `mailto:` con el mensaje ya escrito.

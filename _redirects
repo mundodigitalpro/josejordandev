@@ -5,4 +5,4 @@
 /wrangler.jsonc  /  301
 /.gitignore      /  301
 /.assetsignore   /  301
-/functions/*     /  301
+/worker/*        /  301

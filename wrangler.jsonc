@@ -1,11 +1,21 @@
 {
-  // Despliegue en Cloudflare Workers con assets estáticos: `npx wrangler deploy`.
-  // El dominio josejordan.dev se sirve hoy desde el proyecto de Cloudflare Pages
-  // "josejordandev" (conectado a GitHub), que ignora este fichero.
+  // Despliegue en Cloudflare Workers: `npx wrangler deploy` (o Workers Builds conectado a GitHub).
+  // Sirve la web estática y el formulario de contacto (POST /api/contact), que envía el
+  // correo con Email Routing. Ver README.md > Formulario de contacto.
+  // Cloudflare Pages ignora este fichero: allí la web funciona igual, pero sin /api/contact
+  // (el formulario ofrece entonces el enlace mailto:).
   "name": "josejordan-portfolio",
-  "compatibility_date": "2025-08-24",
+  "main": "worker/index.js",
+  "compatibility_date": "2025-09-01",
   "assets": {
     "directory": "./",
-    "not_found_handling": "404-page"
-  }
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "run_worker_first": ["/api/*"]
+  },
+  // Sin destination_address: el destino sale del secreto CONTACT_TO y debe ser
+  // una dirección verificada en Email Routing.
+  "send_email": [
+    { "name": "MAILER" }
+  ]
 }
