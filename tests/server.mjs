@@ -12,7 +12,8 @@ export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '
 
 const TYPES = {
     '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml',
-    '.woff2': 'font/woff2', '.png': 'image/png', '.pdf': 'application/pdf', '.webmanifest': 'application/manifest+json'
+    '.woff2': 'font/woff2', '.png': 'image/png', '.pdf': 'application/pdf', '.webmanifest': 'application/manifest+json',
+    '.json': 'application/json', '.xml': 'application/xml'
 };
 
 export function startServer(env = { CONTACT_TO: 'owner@example.com' }) {

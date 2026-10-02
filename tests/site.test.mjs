@@ -7,7 +7,10 @@ import { ROOT } from './server.mjs';
 
 const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8');
 const exists = (urlPath) => fs.existsSync(path.join(ROOT, urlPath.replace(/^\//, '').split(/[?#]/)[0]));
-const PAGES = ['index.html', 'en/index.html', '404.html', 'privacy.html'];
+const BLOG_PAGES = ['blog', 'en/blog'].flatMap((dir) => fs.existsSync(path.join(ROOT, dir))
+    ? fs.readdirSync(path.join(ROOT, dir), { recursive: true }).filter((file) => String(file).endsWith('.html')).map((file) => dir + '/' + file)
+    : []);
+const PAGES = ['index.html', 'en/index.html', '404.html', 'privacy.html', ...BLOG_PAGES];
 
 // Esqueleto de etiquetas, atributos estructurales y ningún texto
 function skeleton(html) {
@@ -26,8 +29,8 @@ test('every local file referenced by the pages exists', () => {
     for (const page of PAGES) {
         const refs = [...read(page).matchAll(/\s(?:href|src)="(\/[^"]*)"/g)].map((m) => m[1]);
         for (const ref of refs) {
-            if (ref === '/' || ref === '/en/' || ref === '/privacy') continue;
-            assert.ok(exists(ref), page + ' references a missing file: ' + ref);
+            if (ref === '/privacy') continue;
+            assert.ok(exists(ref) || (ref.endsWith('/') && exists(ref + 'index.html')), page + ' references a missing file: ' + ref);
         }
     }
 });
@@ -43,7 +46,7 @@ test('pages respect the CSP (no inline scripts, styles or handlers)', () => {
 });
 
 test('JSON-LD blocks are valid JSON', () => {
-    for (const page of ['index.html', 'en/index.html']) {
+    for (const page of ['index.html', 'en/index.html', ...BLOG_PAGES.filter((file) => !/^(en\/)?blog\/index\.html$/.test(file))]) {
         const block = read(page).match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
         assert.ok(block, page + ' has JSON-LD');
         assert.doesNotThrow(() => JSON.parse(block[1]), page);
@@ -75,7 +78,7 @@ test('content.js has every project and text in both languages', () => {
 test('repository-only files are hidden from the deployed site', () => {
     const redirects = read('_redirects');
     const ignored = read('.assetsignore');
-    for (const entry of ['CLAUDE.md', 'README.md', 'wrangler.jsonc', 'worker', 'tests', '.github']) {
+    for (const entry of ['CLAUDE.md', 'README.md', 'wrangler.jsonc', 'worker', 'tests', 'posts', 'tools', '.github']) {
         assert.ok(redirects.includes('/' + entry), '_redirects misses ' + entry);
         assert.ok(ignored.split('\n').includes(entry), '.assetsignore misses ' + entry);
     }

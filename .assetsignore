@@ -9,6 +9,8 @@ README.md
 wrangler.jsonc
 worker
 tests
+posts
+tools
 .github
 node_modules
 .dev.vars

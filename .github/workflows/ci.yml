@@ -22,7 +22,11 @@ jobs:
           node-version: 22
 
       - name: Check JavaScript syntax
-        run: for file in *.js worker/*.js; do node --check "$file"; done
+        run: for file in *.js worker/*.js tools/*.mjs; do node --check "$file"; done
+
+      # Igual que el workflow Blog: así una nota recién subida se prueba ya convertida en HTML
+      - name: Build the blog
+        run: node tools/build-blog.mjs
 
       - name: Install Playwright
         run: |

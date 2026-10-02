@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <!-- Generado con tools/build-blog.mjs. No lo edites a mano: cambia posts/ y vuelve a generarlo. -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Cómo está hecha esta web | Notas de Jose Jordan</title>
+    <meta name="description" content="Un escritorio con terminal en HTML, CSS y JavaScript sin dependencias ni proceso de build, alojado gratis en Cloudflare.">
+    <meta name="author" content="Jose Jordan">
+    <meta name="theme-color" content="#171321">
+    <link rel="canonical" href="https://josejordan.dev/blog/como-esta-hecha-esta-web/">
+    <link rel="alternate" hreflang="es" href="https://josejordan.dev/blog/como-esta-hecha-esta-web/">
+    <link rel="alternate" hreflang="en" href="https://josejordan.dev/blog/how-this-site-is-built/">
+    <link rel="alternate" type="application/rss+xml" title="Notas de Jose Jordan" href="/blog/feed.xml">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/manifest.webmanifest">
+
+    <meta property="og:type" content="article">
+    <meta property="og:locale" content="es_ES">
+    <meta property="og:site_name" content="josejordan.dev">
+    <meta property="og:title" content="Cómo está hecha esta web | Notas de Jose Jordan">
+    <meta property="og:description" content="Un escritorio con terminal en HTML, CSS y JavaScript sin dependencias ni proceso de build, alojado gratis en Cloudflare.">
+    <meta property="og:url" content="https://josejordan.dev/blog/como-esta-hecha-esta-web/">
+    <meta property="og:image" content="https://josejordan.dev/og.png?v=2">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@josejordandev">
+    <meta name="twitter:creator" content="@josejordandev">
+    <meta property="article:published_time" content="2026-10-02">
+    <meta property="article:tag" content="web">
+    <meta property="article:tag" content="javascript">
+    <meta property="article:tag" content="cloudflare">
+    <meta property="article:tag" content="pwa">
+
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"BlogPosting","headline":"Cómo está hecha esta web","description":"Un escritorio con terminal en HTML, CSS y JavaScript sin dependencias ni proceso de build, alojado gratis en Cloudflare.","datePublished":"2026-10-02","inLanguage":"es","url":"https://josejordan.dev/blog/como-esta-hecha-esta-web/","mainEntityOfPage":"https://josejordan.dev/blog/como-esta-hecha-esta-web/","keywords":"web, javascript, cloudflare, pwa","author":{"@type":"Person","name":"Jose Jordan","url":"https://josejordan.dev/"},"image":"https://josejordan.dev/og.png?v=2"}
+    </script>
+
+    <script src="/lang.js"></script>
+    <link rel="preload" href="/fonts/JetBrainsMono-var.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/blog.css">
+</head>
+<body class="page-blog">
+    <header class="menubar">
+        <a class="menubar-brand" href="/">josejordan.dev</a>
+        <nav class="blog-nav" aria-label="Notas">
+            <a href="/blog/">Notas</a>
+            <a href="/blog/feed.xml">RSS</a>
+        </nav>
+    </header>
+    <main class="blog-main">
+        <article class="blog-window" aria-labelledby="post-title">
+            <div class="window-header blog-window-header">
+                <div class="traffic-lights" aria-hidden="true"><span class="light close"></span><span class="light minimize"></span><span class="light maximize"></span></div>
+                <span class="window-title">~/notas/como-esta-hecha-esta-web.md</span>
+            </div>
+            <div class="blog-body">
+                <header class="post-header">
+                    <p class="post-meta"><time datetime="2026-10-02">2 de octubre de 2026</time> · 3 min de lectura</p>
+                    <h1 id="post-title">Cómo está hecha esta web</h1>
+                    <p class="post-lead">Un escritorio con terminal en HTML, CSS y JavaScript sin dependencias ni proceso de build, alojado gratis en Cloudflare.</p>
+                    <ul class="post-tags"><li>#web</li><li>#javascript</li><li>#cloudflare</li><li>#pwa</li></ul>
+                    <p class="post-translation"><a href="/blog/how-this-site-is-built/" hreflang="en" lang="en">Read in English</a></p>
+                </header>
+                <div class="post-content">
+<p>Quería que mi portfolio fuera algo más que una página con mi CV: un sitio que se pudiera <strong>usar</strong>. Por eso josejordan.dev es un pequeño escritorio con su barra de menú, sus iconos, un dock y una terminal desde la que puedes ver mi experiencia, mis proyectos o escribirme.</p>
+<h2 id="sin-dependencias-y-sin-build">Sin dependencias y sin build</h2>
+<p>Todo es HTML, CSS y JavaScript &quot;a pelo&quot;. No hay framework, ni <code>node_modules</code>, ni proceso de compilación: los ficheros del repositorio son exactamente los que se publican. La única fuente es JetBrains Mono, alojada en la propia web.</p>
+<p>Esto tiene ventajas muy prácticas:</p>
+<ul><li>La web carga rápido y no depende de que una librería siga mantenida dentro de cinco años.</li><li>Cualquier cambio se entiende leyendo un solo fichero.</li><li>Se puede alojar en cualquier sitio que sirva ficheros estáticos.</li></ul>
+<h2 id="un-gestor-de-ventanas-en-unas-pocas-funciones">Un gestor de ventanas en unas pocas funciones</h2>
+<p>Cada ventana (la terminal, Proyectos, Contacto, el Buscaminas y estas Notas) es un elemento HTML con una cabecera y unos botones. Un pequeño gestor en <code>script.js</code> se encarga de:</p>
+<ol><li>Arrastrarlas con Pointer Events, para que funcione igual con ratón y con el dedo.</li><li>Traer al frente la que pulsas.</li><li>Minimizarlas al dock, cerrarlas y maximizarlas.</li></ol>
+<p>En el móvil las ventanas pasan a ocupar la pantalla, porque arrastrar ventanas en 6 pulgadas no tiene sentido.</p>
+<h2 id="la-terminal">La terminal</h2>
+<p>La terminal tiene más de veinte comandos: <code>about</code>, <code>projects</code>, <code>experience</code>, <code>cv</code>, <code>mail</code>, <code>theme</code>, <code>neofetch</code>… y alguno escondido. Tiene historial con las flechas, autocompletado con <code>Tab</code> y sugerencias cuando te equivocas al escribir.</p>
+<p>Todo el contenido vive en <code>content.js</code>, separado de la lógica, y toda la salida se construye con nodos del DOM, nunca con <code>innerHTML</code>, así que lo que escribas en la terminal no puede inyectar HTML.</p>
+<h2 id="dos-idiomas-sin-duplicar-codigo">Dos idiomas sin duplicar código</h2>
+<p>La versión en español está en <code>/</code> y la inglesa en <code>/en/</code>. Un script mínimo detecta el idioma del navegador (o el que elegiste) y te lleva a tu versión, sin redirigir nunca a Google ni a las vistas previas de las redes sociales, para que cada versión se indexe en su dirección.</p>
+<h2 id="seguridad-una-csp-estricta">Seguridad: una CSP estricta</h2>
+<p>La web se sirve con una <em>Content Security Policy</em> que solo permite scripts y estilos de la propia web. Nada de <code>&lt;script&gt;</code> en línea ni atributos <code>style=&quot;&quot;</code>. Es una buena disciplina: obliga a tener el código ordenado y cierra la puerta a muchos ataques.</p>
+<h2 id="una-app-que-funciona-sin-conexion">Una app que funciona sin conexión</h2>
+<p>Es una PWA: puedes instalarla en el móvil o en el ordenador. Un <em>service worker</em> pide siempre primero la versión más reciente a la red y, si no hay conexión, sirve la copia guardada. Así cada cambio se ve al momento y, aun así, la web funciona en modo avión.</p>
+<h2 id="alojamiento-gratis-en-cloudflare">Alojamiento gratis en Cloudflare</h2>
+<p>Cloudflare publica la web automáticamente con cada push a GitHub. Al ser ficheros estáticos, el plan gratuito sobra: las visitas a páginas estáticas no tienen límite.</p>
+<h2 id="tests-en-cada-cambio">Tests en cada cambio</h2>
+<p>Hay tests con <code>node:test</code>, que viene con Node, y pruebas en un navegador real con Playwright: los comandos, las ventanas, el formulario, el modo sin conexión y que la versión española y la inglesa tengan la misma estructura. GitHub Actions los ejecuta en cada push.</p>
+<h2 id="y-este-blog">Y este blog</h2>
+<p>Escribo cada nota en Markdown. Un script propio, también sin dependencias, la convierte en una página HTML con su RSS, su entrada en el sitemap y sus etiquetas para redes sociales. Publicar es añadir un fichero <code>.md</code> y hacer push.</p>
+<p>Si te interesa el código, está todo en <a href="https://github.com/mundodigitalpro/josejordandev" rel="noopener noreferrer">GitHub</a>. Y si quieres comentarme algo, escribe <code>mail</code> en la terminal.</p>
+                </div>
+                <footer class="post-footer">
+                    <a href="/blog/">← Todas las notas</a>
+                    <a href="/">Volver al escritorio</a>
+                </footer>
+            </div>
+        </article>
+    </main>
+</body>
+</html>

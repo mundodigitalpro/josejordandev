@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Generado con tools/build-blog.mjs. No lo edites a mano: cambia posts/ y vuelve a generarlo. -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>How this site is built | Notes by Jose Jordan</title>
+    <meta name="description" content="A desktop with a terminal in plain HTML, CSS and JavaScript, with no dependencies or build step, hosted for free on Cloudflare.">
+    <meta name="author" content="Jose Jordan">
+    <meta name="theme-color" content="#171321">
+    <link rel="canonical" href="https://josejordan.dev/blog/how-this-site-is-built/">
+    <link rel="alternate" hreflang="en" href="https://josejordan.dev/blog/how-this-site-is-built/">
+    <link rel="alternate" hreflang="es" href="https://josejordan.dev/blog/como-esta-hecha-esta-web/">
+    <link rel="alternate" type="application/rss+xml" title="Notes by Jose Jordan" href="/blog/feed.xml">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/manifest.webmanifest">
+
+    <meta property="og:type" content="article">
+    <meta property="og:locale" content="en_US">
+    <meta property="og:site_name" content="josejordan.dev">
+    <meta property="og:title" content="How this site is built | Notes by Jose Jordan">
+    <meta property="og:description" content="A desktop with a terminal in plain HTML, CSS and JavaScript, with no dependencies or build step, hosted for free on Cloudflare.">
+    <meta property="og:url" content="https://josejordan.dev/blog/how-this-site-is-built/">
+    <meta property="og:image" content="https://josejordan.dev/og-en.png?v=1">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@josejordandev">
+    <meta name="twitter:creator" content="@josejordandev">
+    <meta property="article:published_time" content="2026-10-02">
+    <meta property="article:tag" content="web">
+    <meta property="article:tag" content="javascript">
+    <meta property="article:tag" content="cloudflare">
+    <meta property="article:tag" content="pwa">
+
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"BlogPosting","headline":"How this site is built","description":"A desktop with a terminal in plain HTML, CSS and JavaScript, with no dependencies or build step, hosted for free on Cloudflare.","datePublished":"2026-10-02","inLanguage":"en","url":"https://josejordan.dev/blog/how-this-site-is-built/","mainEntityOfPage":"https://josejordan.dev/blog/how-this-site-is-built/","keywords":"web, javascript, cloudflare, pwa","author":{"@type":"Person","name":"Jose Jordan","url":"https://josejordan.dev/"},"image":"https://josejordan.dev/og-en.png?v=1"}
+    </script>
+
+    <script src="/lang.js"></script>
+    <link rel="preload" href="/fonts/JetBrainsMono-var.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/blog.css">
+</head>
+<body class="page-blog">
+    <header class="menubar">
+        <a class="menubar-brand" href="/en/">josejordan.dev</a>
+        <nav class="blog-nav" aria-label="Notes">
+            <a href="/en/blog/">Notes</a>
+            <a href="/blog/feed.xml">RSS</a>
+        </nav>
+    </header>
+    <main class="blog-main">
+        <article class="blog-window" aria-labelledby="post-title">
+            <div class="window-header blog-window-header">
+                <div class="traffic-lights" aria-hidden="true"><span class="light close"></span><span class="light minimize"></span><span class="light maximize"></span></div>
+                <span class="window-title">~/notas/how-this-site-is-built.md</span>
+            </div>
+            <div class="blog-body">
+                <header class="post-header">
+                    <p class="post-meta"><time datetime="2026-10-02">2 October 2026</time> · 3 min read</p>
+                    <h1 id="post-title">How this site is built</h1>
+                    <p class="post-lead">A desktop with a terminal in plain HTML, CSS and JavaScript, with no dependencies or build step, hosted for free on Cloudflare.</p>
+                    <ul class="post-tags"><li>#web</li><li>#javascript</li><li>#cloudflare</li><li>#pwa</li></ul>
+                    <p class="post-translation"><a href="/blog/como-esta-hecha-esta-web/" hreflang="es" lang="es">Leer en español</a></p>
+                </header>
+                <div class="post-content">
+<p>I wanted my portfolio to be more than a page with my CV: a site you can actually <strong>use</strong>. That is why josejordan.dev is a small desktop with a menu bar, icons, a dock and a terminal where you can browse my experience and projects, or write to me.</p>
+<h2 id="no-dependencies-no-build-step">No dependencies, no build step</h2>
+<p>Everything is plain HTML, CSS and JavaScript. There is no framework, no <code>node_modules</code> and no build step: the files in the repository are exactly the files that get published. The only font, JetBrains Mono, is self-hosted.</p>
+<p>This has very practical advantages:</p>
+<ul><li>The site loads fast and does not depend on a library still being maintained five years from now.</li><li>Any change can be understood by reading a single file.</li><li>It can be hosted anywhere that serves static files.</li></ul>
+<h2 id="a-window-manager-in-a-few-functions">A window manager in a few functions</h2>
+<p>Each window (the terminal, Projects, Contact, Minesweeper and these Notes) is an HTML element with a header and some buttons. A small manager in <code>script.js</code> takes care of:</p>
+<ol><li>Dragging them with Pointer Events, so it works the same with a mouse or a finger.</li><li>Bringing the one you click to the front.</li><li>Minimizing them to the dock, closing and maximizing them.</li></ol>
+<p>On phones the windows fill the screen, because dragging windows around on six inches makes no sense.</p>
+<h2 id="the-terminal">The terminal</h2>
+<p>The terminal has more than twenty commands: <code>about</code>, <code>projects</code>, <code>experience</code>, <code>cv</code>, <code>mail</code>, <code>theme</code>, <code>neofetch</code>… and a few hidden ones. It has history with the arrow keys, <code>Tab</code> completion and suggestions when you mistype.</p>
+<p>All the content lives in <code>content.js</code>, separate from the logic, and all output is built with DOM nodes, never with <code>innerHTML</code>, so whatever you type cannot inject HTML.</p>
+<h2 id="two-languages-without-duplicated-code">Two languages without duplicated code</h2>
+<p>The Spanish version lives at <code>/</code> and the English one at <code>/en/</code>. A tiny script detects your browser language (or the one you picked) and takes you to your version, without ever redirecting Google or social media previews, so each version is indexed at its own address.</p>
+<h2 id="security-a-strict-csp">Security: a strict CSP</h2>
+<p>The site is served with a Content Security Policy that only allows scripts and styles from the site itself. No inline <code>&lt;script&gt;</code> and no <code>style=&quot;&quot;</code> attributes. It is a good discipline: it keeps the code tidy and closes the door to many attacks.</p>
+<h2 id="an-app-that-works-offline">An app that works offline</h2>
+<p>It is a PWA: you can install it on your phone or computer. A service worker always asks the network for the latest version first and, when there is no connection, serves the saved copy. Every change shows up immediately and the site still works in airplane mode.</p>
+<h2 id="free-hosting-on-cloudflare">Free hosting on Cloudflare</h2>
+<p>Cloudflare publishes the site automatically on every push to GitHub. Since it is all static files, the free plan is more than enough: requests to static pages are unlimited.</p>
+<h2 id="tests-on-every-change">Tests on every change</h2>
+<p>There are tests with <code>node:test</code>, which ships with Node, and real-browser tests with Playwright: the commands, the windows, the contact form, offline mode and that the Spanish and English pages share the same structure. GitHub Actions runs them on every push.</p>
+<h2 id="and-this-blog">And this blog</h2>
+<p>I write each note in Markdown. A small script of my own, also dependency-free, turns it into an HTML page with its RSS entry, its sitemap entry and its social media tags. Publishing means adding a <code>.md</code> file and pushing.</p>
+<p>If you are curious about the code, it is all on <a href="https://github.com/mundodigitalpro/josejordandev" rel="noopener noreferrer">GitHub</a>. And if you want to tell me something, type <code>mail</code> in the terminal.</p>
+                </div>
+                <footer class="post-footer">
+                    <a href="/en/blog/">← All notes</a>
+                    <a href="/en/">Back to the desktop</a>
+                </footer>
+            </div>
+        </article>
+    </main>
+</body>
+</html>

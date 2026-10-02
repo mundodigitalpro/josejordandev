@@ -93,6 +93,7 @@
                 theme: 'Cambia el tema del escritorio: theme [nombre]',
                 neofetch: 'Ficha del sistema',
                 matrix: 'Lluvia de código (pulsa una tecla para salir)',
+                blog: 'Notas del blog: blog [nº] abre una',
                 clear: 'Limpia la pantalla',
                 history: 'Muestra los últimos comandos',
                 date: 'Fecha y hora actual',
@@ -146,8 +147,8 @@
             guessRecord: ' Nuevo récord.',
             guessBest: (n) => 'Tu mejor marca: ' + n + (n === 1 ? ' intento.' : ' intentos.'),
             guessQuit: (secret) => 'Partida abandonada. El número era ' + secret + '.',
-            restoreLabel: { terminal: 'Restaurar tamaño de la terminal', projects: 'Restaurar tamaño de Proyectos' },
-            maximizeLabel: { terminal: 'Maximizar terminal', projects: 'Maximizar Proyectos' },
+            restoreLabel: { terminal: 'Restaurar tamaño de la terminal', projects: 'Restaurar tamaño de Proyectos', blog: 'Restaurar tamaño de Notas' },
+            maximizeLabel: { terminal: 'Maximizar terminal', projects: 'Maximizar Proyectos', blog: 'Maximizar Notas' },
             restore: 'Restaurar',
             maximize: 'Maximizar',
             contactHint: () => ['Escribe ', kbd('mail'), ' para enviarme un mensaje sin salir de aquí.'],
@@ -194,7 +195,17 @@
             },
             uptime: (minutes) => (minutes < 1 ? 'menos de un minuto' : minutes + (minutes === 1 ? ' minuto' : ' minutos')),
             matrixHint: 'Despierta, Neo… Pulsa cualquier tecla o toca la pantalla para salir.',
-            matrixReduced: 'Tienes activada la reducción de movimiento, así que la lluvia de código se queda en el tintero.'
+            matrixReduced: 'Tienes activada la reducción de movimiento, así que la lluvia de código se queda en el tintero.',
+            blogIntro: 'Lo que voy aprendiendo y construyendo. Cada nota se abre en su propia página.',
+            blogLoading: 'Cargando notas…',
+            blogError: 'No se han podido cargar las notas. Puedes verlas en ',
+            blogEmpty: 'Todavía no hay notas publicadas.',
+            blogAll: 'Todas las notas',
+            blogReading: (n) => n + ' min de lectura',
+            blogOtherLang: 'en inglés',
+            blogHint: () => ['Escribe ', kbd('blog 1'), ' para leer una nota o abre la ventana Notas del escritorio.'],
+            blogOpening: (title) => 'Abriendo «' + title + '»…',
+            blogUnknown: (n) => 'blog: no hay ninguna nota con el número ' + n + '.'
         },
         en: {
             desc: {
@@ -214,6 +225,7 @@
                 theme: 'Change the desktop theme: theme [name]',
                 neofetch: 'System information',
                 matrix: 'Digital rain (press any key to stop)',
+                blog: 'Blog notes: blog [number] opens one',
                 clear: 'Clear the screen',
                 history: 'Show recent commands',
                 date: 'Current date and time',
@@ -268,8 +280,8 @@
             guessRecord: ' New record.',
             guessBest: (n) => 'Your best: ' + n + (n === 1 ? ' try.' : ' tries.'),
             guessQuit: (secret) => 'Game over. The number was ' + secret + '.',
-            restoreLabel: { terminal: 'Restore terminal size', projects: 'Restore Projects size' },
-            maximizeLabel: { terminal: 'Maximize terminal', projects: 'Maximize Projects' },
+            restoreLabel: { terminal: 'Restore terminal size', projects: 'Restore Projects size', blog: 'Restore Notes size' },
+            maximizeLabel: { terminal: 'Maximize terminal', projects: 'Maximize Projects', blog: 'Maximize Notes' },
             restore: 'Restore',
             maximize: 'Maximize',
             contactHint: () => ['Type ', kbd('mail'), ' to send me a message from right here.'],
@@ -316,7 +328,17 @@
             },
             uptime: (minutes) => (minutes < 1 ? 'less than a minute' : minutes + (minutes === 1 ? ' minute' : ' minutes')),
             matrixHint: 'Wake up, Neo… Press any key or tap the screen to stop.',
-            matrixReduced: 'Reduced motion is on, so the digital rain stays in the drawer.'
+            matrixReduced: 'Reduced motion is on, so the digital rain stays in the drawer.',
+            blogIntro: 'What I am learning and building. Each note opens on its own page.',
+            blogLoading: 'Loading notes…',
+            blogError: 'The notes could not be loaded. You can read them at ',
+            blogEmpty: 'No notes published yet.',
+            blogAll: 'All notes',
+            blogReading: (n) => n + ' min read',
+            blogOtherLang: 'in Spanish',
+            blogHint: () => ['Type ', kbd('blog 1'), ' to read a note or open the Notes window on the desktop.'],
+            blogOpening: (title) => 'Opening “' + title + '”…',
+            blogUnknown: (n) => 'blog: there is no note number ' + n + '.'
         }
     };
 
@@ -524,6 +546,13 @@
         }
     });
 
+    const blogWindow = registerWindow('blog', {
+        onShow: () => {
+            const container = $('blog-body');
+            if (container && !container.dataset.loaded) renderBlog(container);
+        }
+    });
+
     let contactForm = null;
     const contactWindow = registerWindow('contact', {
         onShow: () => {
@@ -688,6 +717,59 @@
         parts.push(grid);
         if (links.github) parts.push(el('p', 'pj-more muted', [T.projectsMore, link(links.github, shortUrl(links.github))]));
         container.replaceChildren(...parts);
+    }
+
+    /* ---------- Notas (blog) ---------- */
+
+    // Las páginas del blog se generan con tools/build-blog.mjs; aquí solo se lee su índice
+    const BLOG_INDEX = LANG === 'en' ? '/en/blog/' : '/blog/';
+    let blogPosts = null;
+
+    function loadBlogPosts() {
+        if (!blogPosts) {
+            blogPosts = fetch('/blog/posts.json')
+                .then((response) => (response.ok ? response.json() : Promise.reject(new Error(response.status))))
+                .then((posts) => posts.filter((post) => post.lang === LANG || !posts.some((other) => other.slug === post.translation && other.lang === LANG)))
+                .catch((error) => {
+                    blogPosts = null; // se reintenta la próxima vez
+                    throw error;
+                });
+        }
+        return blogPosts;
+    }
+
+    function formatPostDate(date) {
+        const [y, m, d] = date.split('-').map(Number);
+        return new Intl.DateTimeFormat(LOCALE, { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(y, m - 1, d));
+    }
+
+    function blogError() {
+        return [T.blogError, link(BLOG_INDEX, location.host + BLOG_INDEX), '.'];
+    }
+
+    function renderBlog(container) {
+        container.replaceChildren(el('p', 'muted', T.blogLoading));
+        loadBlogPosts().then((posts) => {
+            container.dataset.loaded = 'true';
+            const parts = [el('p', 'pj-intro', T.blogIntro)];
+            if (!posts.length) parts.push(el('p', 'muted', T.blogEmpty));
+            const list = el('ol', 'nt-list');
+            posts.forEach((post) => {
+                const meta = [formatPostDate(post.date), ' · ', T.blogReading(post.readingMinutes)];
+                if (post.lang !== LANG) meta.push(' · ', T.blogOtherLang);
+                const title = link(post.url, post.title);
+                if (post.lang !== LANG) title.hreflang = post.lang;
+                const item = el('li', 'nt-item', [el('p', 'nt-meta', meta), el('h3', 'nt-title', title)]);
+                if (post.description) item.append(el('p', 'nt-desc', post.description));
+                if (post.tags.length) item.append(el('p', 'nt-tags', post.tags.map((tag) => '#' + tag).join('  ')));
+                list.append(item);
+            });
+            if (posts.length) parts.push(list);
+            parts.push(el('p', 'pj-more muted', [link(BLOG_INDEX, T.blogAll), ' · ', link('/blog/feed.xml', 'RSS')]));
+            container.replaceChildren(...parts);
+        }).catch(() => {
+            container.replaceChildren(el('p', 'err', blogError()));
+        });
     }
 
     /* ---------- Ventana de contacto ---------- */
@@ -989,6 +1071,38 @@
         if (contactWindow) out.muted(T.contactHint());
     });
 
+    define('blog', (out, args) => {
+        out.muted(T.blogLoading);
+        const loading = out.box.lastChild;
+        loadBlogPosts().then((posts) => {
+            loading.remove();
+            const target = args[0] || '';
+            if (/^\d+$/.test(target)) {
+                const post = posts[Number(target) - 1];
+                if (!post) {
+                    out.error(T.blogUnknown(target));
+                } else {
+                    out.line(T.blogOpening(post.title));
+                    setTimeout(() => location.assign(post.url), 250);
+                }
+            } else if (!posts.length) {
+                out.muted(T.blogEmpty);
+            } else {
+                const rows = el('div', 'rows');
+                posts.forEach((post, i) => {
+                    rows.append(el('span', 'key', String(i + 1)), el('span', null, [link(post.url, post.title), ' ', el('span', 'tag', formatPostDate(post.date))]));
+                });
+                out.node(rows);
+                out.muted(T.blogHint());
+            }
+            scrollToEnd();
+        }).catch(() => {
+            loading.remove();
+            out.error(blogError());
+            scrollToEnd();
+        });
+    });
+
     define('mail', (out, args, argText) => {
         if (!contactWindow) return;
         out.line(T.mailOpened);
@@ -1180,7 +1294,7 @@
     const aliases = {
         ayuda: 'help', habilidades: 'skills', proyectos: 'projects', experiencia: 'experience', formacion: 'education', 'formación': 'education',
         contacto: 'contact', idioma: 'lang', buscaminas: 'minesweeper', mines: 'minesweeper', adivina: 'guess', limpiar: 'clear', fecha: 'date',
-        salir: 'exit', language: 'lang', resume: 'cv', tema: 'theme', fetch: 'neofetch', mensaje: 'mail', message: 'mail', email: 'mail'
+        salir: 'exit', language: 'lang', resume: 'cv', tema: 'theme', fetch: 'neofetch', notas: 'blog', notes: 'blog', mensaje: 'mail', message: 'mail', email: 'mail'
     };
     Object.entries(aliases).forEach(([name, targetName]) => {
         const command = commands.get(targetName);

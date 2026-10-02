@@ -1,0 +1,34 @@
+[
+  {
+    "slug": "como-esta-hecha-esta-web",
+    "title": "Cómo está hecha esta web",
+    "description": "Un escritorio con terminal en HTML, CSS y JavaScript sin dependencias ni proceso de build, alojado gratis en Cloudflare.",
+    "date": "2026-10-02",
+    "lang": "es",
+    "tags": [
+      "web",
+      "javascript",
+      "cloudflare",
+      "pwa"
+    ],
+    "translation": "how-this-site-is-built",
+    "url": "/blog/como-esta-hecha-esta-web/",
+    "readingMinutes": 3
+  },
+  {
+    "slug": "how-this-site-is-built",
+    "title": "How this site is built",
+    "description": "A desktop with a terminal in plain HTML, CSS and JavaScript, with no dependencies or build step, hosted for free on Cloudflare.",
+    "date": "2026-10-02",
+    "lang": "en",
+    "tags": [
+      "web",
+      "javascript",
+      "cloudflare",
+      "pwa"
+    ],
+    "translation": "como-esta-hecha-esta-web",
+    "url": "/blog/how-this-site-is-built/",
+    "readingMinutes": 3
+  }
+]

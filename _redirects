@@ -7,4 +7,6 @@
 /.assetsignore   /  301
 /worker/*        /  301
 /tests/*         /  301
+/posts/*         /  301
+/tools/*         /  301
 /.github/*       /  301

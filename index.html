@@ -76,6 +76,12 @@
                 </span>
                 <span class="icon-label">Proyectos</span>
             </button>
+            <button class="icon" type="button" data-open="blog">
+                <span class="icon-tile icon-blog" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                </span>
+                <span class="icon-label">Notas</span>
+            </button>
             <button class="icon" type="button" data-command="cv">
                 <span class="icon-tile icon-cv" aria-hidden="true">
                     <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
@@ -162,6 +168,18 @@
         <div class="window-body" id="projects-body"></div>
     </section>
 
+    <section class="window app-blog is-closed" id="blog" aria-label="Notas">
+        <div class="window-header">
+            <div class="traffic-lights">
+                <button class="light close" type="button" data-action="close" title="Cerrar" aria-label="Cerrar Notas"></button>
+                <button class="light minimize" type="button" data-action="minimize" title="Minimizar" aria-label="Minimizar Notas"></button>
+                <button class="light maximize" type="button" data-action="maximize" title="Maximizar" aria-label="Maximizar Notas"></button>
+            </div>
+            <span class="window-title">~/notas</span>
+        </div>
+        <div class="window-body" id="blog-body"></div>
+    </section>
+
     <section class="window app-contact is-closed" id="contact" aria-label="Contacto">
         <div class="window-header">
             <div class="traffic-lights">
@@ -185,6 +203,10 @@
         <button class="dock-item" type="button" data-window="projects">
             <span class="dock-icon icon-folder" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span>
             <span class="dock-label">Proyectos</span>
+        </button>
+        <button class="dock-item" type="button" data-window="blog">
+            <span class="dock-icon icon-blog" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span>
+            <span class="dock-label">Notas</span>
         </button>
         <button class="dock-item" type="button" data-window="contact">
             <span class="dock-icon icon-mail" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg></span>

@@ -24,4 +24,34 @@
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
+  <!-- blog:start (generado con tools/build-blog.mjs) -->
+  <url>
+    <loc>https://josejordan.dev/blog/</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://josejordan.dev/blog/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://josejordan.dev/en/blog/"/>
+    <lastmod>2026-10-02</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://josejordan.dev/en/blog/</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://josejordan.dev/blog/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://josejordan.dev/en/blog/"/>
+    <lastmod>2026-10-02</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://josejordan.dev/blog/como-esta-hecha-esta-web/</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://josejordan.dev/blog/como-esta-hecha-esta-web/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://josejordan.dev/blog/how-this-site-is-built/"/>
+    <lastmod>2026-10-02</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://josejordan.dev/blog/how-this-site-is-built/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://josejordan.dev/blog/how-this-site-is-built/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://josejordan.dev/blog/como-esta-hecha-esta-web/"/>
+    <lastmod>2026-10-02</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <!-- blog:end -->
 </urlset>

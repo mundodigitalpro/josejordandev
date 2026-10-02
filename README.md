@@ -16,7 +16,8 @@ Sitio estático (HTML, CSS y JavaScript sin dependencias ni proceso de build) al
 | `styles.css` | Estilos del escritorio y la terminal |
 | `cv-jose-jordan.pdf` | CV que abren el comando `cv` y el icono CV |
 | `manifest.webmanifest`, `sw.js`, `icon-*.png` | PWA: la web se puede instalar y funciona sin conexión |
-| `tests/`, `.github/workflows/ci.yml` | Tests automáticos y su ejecución en GitHub Actions |
+| `posts/`, `tools/build-blog.mjs`, `blog.css`, `blog/`, `en/blog/` | Blog: notas en Markdown, generador y páginas generadas |
+| `tests/`, `.github/workflows/` | Tests automáticos y su ejecución en GitHub Actions |
 | `404.html` | Página de error |
 | `privacy.html`, `privacy.css` | Política de privacidad de las apps |
 | `fonts/` | JetBrains Mono (SIL Open Font License) |
@@ -66,6 +67,34 @@ Los comandos de la terminal leen de `content.js`:
 - `theme` lista los temas del escritorio (`cordoba`, `noche`, `mezquita`, `matrix`) y `theme <nombre>` aplica uno y lo recuerda; `neofetch` muestra una ficha del sistema y `matrix` una lluvia de código.
 - El icono **Proyectos** abre una ventana con tarjetas y filtros por lenguaje, generada desde `projects` en `content.js` (campo opcional `demo` para enlazar una demo).
 - El icono **Contacto** y el comando `mail` (o `mail <texto>`) abren el formulario de contacto.
+
+## Blog (Notas)
+
+Las notas se escriben en Markdown en `posts/` y se publican en `josejordan.dev/blog/`. También aparecen en la ventana **Notas** del escritorio y con el comando `blog` de la terminal (`blog 1` abre la más reciente).
+
+Para publicar una nota:
+
+1. Crea `posts/<slug>.md`. El nombre del fichero es la dirección: `posts/mi-nota.md` → `/blog/mi-nota/` (solo minúsculas, números y guiones).
+2. Empieza con esta cabecera:
+
+   ```markdown
+   ---
+   title: Título de la nota
+   description: Resumen de una o dos frases para Google, RSS y redes sociales.
+   date: 2026-10-02
+   lang: es
+   tags: [web, python]
+   ---
+
+   Aquí empieza el texto. **Negrita**, *cursiva*, `código`, [enlaces](https://ejemplo.com)…
+
+   ## Un apartado
+   ```
+
+   Opcional: `translation: slug-de-la-version-en-ingles` para enlazar dos versiones de la misma nota, y `draft: true` para guardarla sin publicarla.
+3. Haz push a `main`. El workflow **Blog** genera las páginas, el RSS (`/blog/feed.xml`) y el sitemap, y sube el resultado; Cloudflare lo publica. Se puede hacer todo desde la web de GitHub (*Add file → Create new file* en la carpeta `posts`).
+
+En local: `node tools/build-blog.mjs` genera el blog y `node tools/build-blog.mjs --check` comprueba que está al día. No edites a mano lo que hay en `blog/` y `en/blog/`: se sobrescribe.
 
 ## Formulario de contacto
 

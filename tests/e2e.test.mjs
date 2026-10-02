@@ -35,6 +35,7 @@ test('desktop, terminal and windows work in both languages', { skip, timeout: 90
             };
 
             assert.match(await run('help'), /neofetch/);
+            assert.match(await run('help'), /blog/);
             assert.ok((await run('about')).length > 100, 'about text');
             assert.match(await run('nonexistent'), /nonexistent/);
             assert.match(await run('neofetch'), /jose@josejordan\.dev/);
@@ -50,6 +51,10 @@ test('desktop, terminal and windows work in both languages', { skip, timeout: 90
             await page.click('#projects .pj-filter:has-text("Python")');
             const visible = await page.locator('#projects .pj-card:visible').count();
             assert.ok(visible > 0 && visible < cards, 'language filter');
+
+            await page.click('.icon[data-open="blog"]');
+            await page.waitForSelector('#blog .nt-item');
+            assert.equal(await page.locator('#blog .nt-item').first().getAttribute('class'), 'nt-item');
 
             await page.click('.dock-item[data-window="minesweeper"]');
             assert.ok(await page.locator('#minesweeper .ms-cell').count() > 50, 'minesweeper board');
@@ -67,6 +72,16 @@ test('desktop, terminal and windows work in both languages', { skip, timeout: 90
             await page.close();
         }
         assert.equal(server.sent.length, 2);
+
+        // blog 1 abre la nota más reciente en su propia página
+        const page = await browser.newPage();
+        await page.addInitScript(() => localStorage.setItem('lang', 'es'));
+        await page.goto(server.url + '/');
+        await page.fill('#command-input', 'blog 1');
+        await page.press('#command-input', 'Enter');
+        await page.waitForURL(/\/blog\/[a-z0-9-]+\/$/);
+        assert.ok((await page.textContent('h1')).length > 3);
+        await page.close();
     } finally {
         await browser.close();
         await server.close();

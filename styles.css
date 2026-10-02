@@ -253,6 +253,7 @@ body {
 .icon-cv       { --tile: #b8463b; }
 .icon-mail     { --tile: #3f88ad; }
 .icon-github   { --tile: #4a3f62; }
+.icon-blog     { --tile: #2f7d6d; }
 .icon-mines    { --tile: #6b4a8a; }
 .icon-terminal { --tile: #1f1a2b; }
 
@@ -312,6 +313,14 @@ body {
     transform: translate(calc(-50% + 96px), calc(-50% + 12px));
     width: min(820px, calc(100vw - 196px));
     height: min(600px, calc(100vh - var(--menubar-h) - var(--dock-space) - 24px));
+}
+
+.app-blog {
+    left: 50%;
+    top: calc(50% + (var(--menubar-h) - var(--dock-space)) / 2);
+    transform: translate(calc(-50% + 112px), calc(-50% + 20px));
+    width: min(680px, calc(100vw - 196px));
+    height: min(560px, calc(100vh - var(--menubar-h) - var(--dock-space) - 24px));
 }
 
 .app-contact {
@@ -667,6 +676,7 @@ body {
 /* ---------- Proyectos ---------- */
 
 .app-projects .window-body,
+.app-blog .window-body,
 .app-contact .window-body {
     padding: 18px 20px 20px;
     font-size: 13px;
@@ -674,9 +684,11 @@ body {
 }
 
 .app-projects p,
+.app-blog p,
 .app-contact p { margin: 0; }
 
 .app-projects a,
+.app-blog a,
 .app-contact a {
     color: var(--sky);
     text-underline-offset: 3px;
@@ -684,9 +696,11 @@ body {
 }
 
 .app-projects a:hover,
+.app-blog a:hover,
 .app-contact a:hover { text-decoration-color: currentColor; }
 
 .app-projects a:focus-visible,
+.app-blog a:focus-visible,
 .app-contact a:focus-visible,
 .pj-filter:focus-visible,
 .cf-submit:focus-visible {
@@ -762,6 +776,18 @@ body {
 .pj-desc { flex: 1; color: var(--ink); }
 .pj-actions { display: flex; gap: 14px; margin-top: 4px; font-weight: 600; }
 .pj-more { margin-top: 16px !important; }
+
+/* ---------- Notas ---------- */
+
+.nt-list { list-style: none; margin: 0; padding: 0; }
+.nt-item { padding: 14px 0; border-top: 1px solid var(--term-border); }
+.nt-item:first-child { border-top: 0; padding-top: 0; }
+.nt-meta { font-size: 12px; color: var(--ink-muted); }
+.nt-title { margin: 4px 0 6px; font-size: 15px; line-height: 1.4; }
+.app-blog .nt-title a { color: var(--gold); text-decoration: none; }
+.app-blog .nt-title a:hover { text-decoration: underline; }
+.nt-desc { color: var(--ink); }
+.nt-tags { margin-top: 6px !important; font-size: 12px; color: var(--accent); }
 
 /* ---------- Contacto ---------- */
 
@@ -1079,6 +1105,7 @@ ol.projects li::marker { color: var(--ink-muted); }
     .dock-item { padding: 5px 12px 8px 8px; }
 
     .app-projects .window-body,
+    .app-blog .window-body,
     .app-contact .window-body { padding: 14px; font-size: 14px; }
     .neofetch { flex-direction: column; gap: 6px; }
     .nf-art { font-size: 12px; }
