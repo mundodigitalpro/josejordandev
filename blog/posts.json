@@ -16,6 +16,23 @@
     "readingMinutes": 3
   },
   {
+    "slug": "el-service-worker-que-casi-me-la-lia",
+    "title": "El service worker que casi me la lía",
+    "description": "Añadí una ventana nueva a mi web, los tests pasaban y en mi navegador el icono no hacía nada. La culpa era de la caché, y la solución, una línea.",
+    "date": "2026-10-02",
+    "lang": "es",
+    "tags": [
+      "pwa",
+      "service-worker",
+      "cache",
+      "javascript",
+      "depuracion"
+    ],
+    "translation": "the-service-worker-that-almost-got-me",
+    "url": "/blog/el-service-worker-que-casi-me-la-lia/",
+    "readingMinutes": 5
+  },
+  {
     "slug": "how-this-site-is-built",
     "title": "How this site is built",
     "description": "A desktop with a terminal in plain HTML, CSS and JavaScript, with no dependencies or build step, hosted for free on Cloudflare.",
@@ -30,5 +47,22 @@
     "translation": "como-esta-hecha-esta-web",
     "url": "/blog/how-this-site-is-built/",
     "readingMinutes": 3
+  },
+  {
+    "slug": "the-service-worker-that-almost-got-me",
+    "title": "The service worker that almost got me",
+    "description": "I added a new window to my site, the tests passed, and in my browser the icon did nothing. The cache was to blame, and the fix was one line.",
+    "date": "2026-10-02",
+    "lang": "en",
+    "tags": [
+      "pwa",
+      "service-worker",
+      "cache",
+      "javascript",
+      "debugging"
+    ],
+    "translation": "el-service-worker-que-casi-me-la-lia",
+    "url": "/blog/the-service-worker-that-almost-got-me/",
+    "readingMinutes": 5
   }
 ]

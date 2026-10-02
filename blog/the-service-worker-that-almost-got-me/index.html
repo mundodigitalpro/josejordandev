@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Generado con tools/build-blog.mjs. No lo edites a mano: cambia posts/ y vuelve a generarlo. -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>The service worker that almost got me | Notes by Jose Jordan</title>
+    <meta name="description" content="I added a new window to my site, the tests passed, and in my browser the icon did nothing. The cache was to blame, and the fix was one line.">
+    <meta name="author" content="Jose Jordan">
+    <meta name="theme-color" content="#171321">
+    <link rel="canonical" href="https://josejordan.dev/blog/the-service-worker-that-almost-got-me/">
+    <link rel="alternate" hreflang="en" href="https://josejordan.dev/blog/the-service-worker-that-almost-got-me/">
+    <link rel="alternate" hreflang="es" href="https://josejordan.dev/blog/el-service-worker-que-casi-me-la-lia/">
+    <link rel="alternate" type="application/rss+xml" title="Notes by Jose Jordan" href="/blog/feed.xml">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/manifest.webmanifest">
+
+    <meta property="og:type" content="article">
+    <meta property="og:locale" content="en_US">
+    <meta property="og:site_name" content="josejordan.dev">
+    <meta property="og:title" content="The service worker that almost got me | Notes by Jose Jordan">
+    <meta property="og:description" content="I added a new window to my site, the tests passed, and in my browser the icon did nothing. The cache was to blame, and the fix was one line.">
+    <meta property="og:url" content="https://josejordan.dev/blog/the-service-worker-that-almost-got-me/">
+    <meta property="og:image" content="https://josejordan.dev/og-en.png?v=1">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@josejordandev">
+    <meta name="twitter:creator" content="@josejordandev">
+    <meta property="article:published_time" content="2026-10-02">
+    <meta property="article:tag" content="pwa">
+    <meta property="article:tag" content="service-worker">
+    <meta property="article:tag" content="cache">
+    <meta property="article:tag" content="javascript">
+    <meta property="article:tag" content="debugging">
+
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"BlogPosting","headline":"The service worker that almost got me","description":"I added a new window to my site, the tests passed, and in my browser the icon did nothing. The cache was to blame, and the fix was one line.","datePublished":"2026-10-02","inLanguage":"en","url":"https://josejordan.dev/blog/the-service-worker-that-almost-got-me/","mainEntityOfPage":"https://josejordan.dev/blog/the-service-worker-that-almost-got-me/","keywords":"pwa, service-worker, cache, javascript, debugging","author":{"@type":"Person","name":"Jose Jordan","url":"https://josejordan.dev/"},"image":"https://josejordan.dev/og-en.png?v=1"}
+    </script>
+
+    <script src="/lang.js"></script>
+    <link rel="preload" href="/fonts/JetBrainsMono-var.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/blog.css">
+</head>
+<body class="page-blog">
+    <header class="menubar">
+        <a class="menubar-brand" href="/en/">josejordan.dev</a>
+        <nav class="blog-nav" aria-label="Notes">
+            <a href="/en/blog/">Notes</a>
+            <a href="/blog/feed.xml">RSS</a>
+        </nav>
+    </header>
+    <main class="blog-main">
+        <article class="blog-window" aria-labelledby="post-title">
+            <div class="window-header blog-window-header">
+                <div class="traffic-lights" aria-hidden="true"><span class="light close"></span><span class="light minimize"></span><span class="light maximize"></span></div>
+                <span class="window-title">~/notas/the-service-worker-that-almost-got-me.md</span>
+            </div>
+            <div class="blog-body">
+                <header class="post-header">
+                    <p class="post-meta"><time datetime="2026-10-02">2 October 2026</time> · 5 min read</p>
+                    <h1 id="post-title">The service worker that almost got me</h1>
+                    <p class="post-lead">I added a new window to my site, the tests passed, and in my browser the icon did nothing. The cache was to blame, and the fix was one line.</p>
+                    <ul class="post-tags"><li>#pwa</li><li>#service-worker</li><li>#cache</li><li>#javascript</li><li>#debugging</li></ul>
+                    <p class="post-translation"><a href="/blog/el-service-worker-que-casi-me-la-lia/" hreflang="es" lang="es">Leer en español</a></p>
+                </header>
+                <div class="post-content">
+<p>I recently added a new window to this site, <strong>Notes</strong>, the one that lists the posts on this blog. It had its icon on the desktop, its button in the dock and its command in the terminal. The tests passed locally and on GitHub Actions. I deployed it, opened the site in my browser, clicked the icon… and nothing happened.</p>
+<p>No error on screen. Just nothing.</p>
+<h2 id="the-symptom">The symptom</h2>
+<p>The icon <strong>was there</strong>: I could see it on the desktop. But clicking it did not open the window. In a clean browser, on the other hand, it worked perfectly.</p>
+<p>That combination is already a clue: if the new HTML is there but the new behaviour is not, the browser is most likely <strong>mixing versions</strong>. Today's HTML with yesterday's JavaScript.</p>
+<p>And that is exactly what was happening. The new <code>index.html</code> had the icon, but my browser was still running an old <code>script.js</code> that knew nothing about a Notes window. The code looked for the window, did not find it, and did nothing. Total silence.</p>
+<h2 id="but-my-service-worker-goes-to-the-network-first">&quot;But my service worker goes to the network first…&quot;</h2>
+<p>This site is a PWA and has a service worker precisely so that it works offline. When I wrote it I chose a <strong>network-first</strong> strategy: for every request, try the network first and use the saved copy only if that fails. The whole point was to avoid this very problem: every deploy should show up immediately and versions should never mix.</p>
+<p>The code looked roughly like this:</p>
+<pre><code class="language-js">async function networkFirst(request) {
+    const cache = await caches.open(CACHE);
+    try {
+        const response = await fetch(request);
+        cache.put(request, response.clone());
+        return response;
+    } catch (error) {
+        return cache.match(request);
+    }
+}</code></pre>
+<p>It looks flawless. The problem is in one word: <code>fetch(request)</code> <strong>does not mean &quot;go to the server&quot;</strong>. It means &quot;get me this resource&quot;, and the browser has its own HTTP cache that it can use before going out to the network.</p>
+<h2 id="heuristic-caching">Heuristic caching</h2>
+<p>When a response carries a clear <code>Cache-Control</code> header, the browser obeys it. But when the response says nothing about how long it may be kept, the HTTP standard lets the browser <strong>decide for itself</strong>. This is called <em>heuristic caching</em>: if the file has a last-modified date, the browser may treat it as fresh for a fraction of the time since it last changed, typically 10%.</p>
+<p>A <code>script.js</code> that has not changed for a month can be considered good for about three days without asking anyone.</p>
+<p>My <code>_headers</code> file, which tells Cloudflare which headers to send, had rules for images and fonts, but <strong>none for the scripts</strong>. The service worker called <code>fetch(request)</code>, the browser checked its HTTP cache, saw a copy that was &quot;still fresh&quot; according to its heuristic and returned it without ever asking the server. Network-first never reached the network.</p>
+<h2 id="reproducing-it-and-tripping-on-the-way">Reproducing it (and tripping on the way)</h2>
+<p>Before fixing anything I wanted to see the bug in a test. I set up a local server that served <code>script.js</code> without <code>Cache-Control</code> and with an old modification date, and appended a version marker to it: <code>A</code> on the first visit and <code>B</code> after &quot;deploying&quot;.</p>
+<p>The first Playwright test said it was still loading <code>A</code>, even with the fix in place. When I counted the requests reaching the server, I saw that on the second visit <code>script.js</code> <strong>was not even requested</strong>. Chromium was taking it from its in-memory cache because my test navigated again inside the same tab, something that does not happen when a visitor comes back days later.</p>
+<p>I changed the test to open a new tab, like a real visit, and then it was clear:</p>
+<ul><li>with the old service worker, the page kept running version <code>A</code> and the request never reached the server;</li><li>with the fix, the server got the request and the page loaded version <code>B</code>.</li></ul>
+<p>A lesson inside the lesson: <strong>when a cache test gives you a strange result, count the requests that reach the server</strong> before trusting it.</p>
+<h2 id="the-fix">The fix</h2>
+<p>The main fix is a single option on the service worker's <code>fetch</code>:</p>
+<pre><code class="language-js">const response = await fetch(request, { cache: 'no-cache' });</code></pre>
+<p>Despite its confusing name, <code>no-cache</code> does not mean &quot;do not store anything&quot;. It means &quot;<strong>you may use your copy, but ask the server first whether it is still valid</strong>&quot;. If nothing changed, the server answers <code>304 Not Modified</code>, a tiny response, and the copy is used. If it changed, the new version arrives. The cost is almost zero and mixed versions are gone.</p>
+<p>To also cover visits that do not go through the service worker yet, I added the same instruction to <code>_headers</code> for the files that change on every deploy:</p>
+<pre><code>/script.js
+  Cache-Control: no-cache
+/styles.css
+  Cache-Control: no-cache</code></pre>
+<p>And I bumped the service worker version so that browsers with the old one installed would pick up the new one.</p>
+<h2 id="making-sure-it-does-not-happen-again">Making sure it does not happen again</h2>
+<p>I added a test that checks two things: that the service worker makes its requests with <code>cache: 'no-cache'</code> and that <code>_headers</code> includes that header for the scripts and stylesheets. It is a simple, almost textual test, but it will warn me if someone (probably me) ever &quot;cleans up&quot; those lines without knowing why they are there.</p>
+<h2 id="what-i-take-away">What I take away</h2>
+<ul><li><strong><code>fetch()</code> inside a service worker does not guarantee going to the network.</strong> If you really want the network, say so with <code>cache: 'no-cache'</code> or <code>cache: 'reload'</code>.</li><li><strong>If you do not tell the browser how long it may cache something, it will decide for you.</strong> Set an explicit <code>Cache-Control</code> on everything that changes with each deploy.</li><li><strong>&quot;New HTML, old behaviour&quot; almost always means mixed versions.</strong> It is the first thing to check.</li><li><strong>Tests in a clean browser do not catch this kind of bug.</strong> You have to simulate the returning visitor.</li></ul>
+<p>The best thing about having a blog is that this bug, instead of staying buried in a commit, became a note. If something similar has happened to you, write to me with <code>mail</code> from the terminal: I would love to read it.</p>
+                </div>
+                <footer class="post-footer">
+                    <a href="/en/blog/">← All notes</a>
+                    <a href="/en/">Back to the desktop</a>
+                </footer>
+            </div>
+        </article>
+    </main>
+</body>
+</html>

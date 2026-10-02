@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <!-- Generado con tools/build-blog.mjs. No lo edites a mano: cambia posts/ y vuelve a generarlo. -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>El service worker que casi me la lía | Notas de Jose Jordan</title>
+    <meta name="description" content="Añadí una ventana nueva a mi web, los tests pasaban y en mi navegador el icono no hacía nada. La culpa era de la caché, y la solución, una línea.">
+    <meta name="author" content="Jose Jordan">
+    <meta name="theme-color" content="#171321">
+    <link rel="canonical" href="https://josejordan.dev/blog/el-service-worker-que-casi-me-la-lia/">
+    <link rel="alternate" hreflang="es" href="https://josejordan.dev/blog/el-service-worker-que-casi-me-la-lia/">
+    <link rel="alternate" hreflang="en" href="https://josejordan.dev/blog/the-service-worker-that-almost-got-me/">
+    <link rel="alternate" type="application/rss+xml" title="Notas de Jose Jordan" href="/blog/feed.xml">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/manifest.webmanifest">
+
+    <meta property="og:type" content="article">
+    <meta property="og:locale" content="es_ES">
+    <meta property="og:site_name" content="josejordan.dev">
+    <meta property="og:title" content="El service worker que casi me la lía | Notas de Jose Jordan">
+    <meta property="og:description" content="Añadí una ventana nueva a mi web, los tests pasaban y en mi navegador el icono no hacía nada. La culpa era de la caché, y la solución, una línea.">
+    <meta property="og:url" content="https://josejordan.dev/blog/el-service-worker-que-casi-me-la-lia/">
+    <meta property="og:image" content="https://josejordan.dev/og.png?v=2">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@josejordandev">
+    <meta name="twitter:creator" content="@josejordandev">
+    <meta property="article:published_time" content="2026-10-02">
+    <meta property="article:tag" content="pwa">
+    <meta property="article:tag" content="service-worker">
+    <meta property="article:tag" content="cache">
+    <meta property="article:tag" content="javascript">
+    <meta property="article:tag" content="depuracion">
+
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"BlogPosting","headline":"El service worker que casi me la lía","description":"Añadí una ventana nueva a mi web, los tests pasaban y en mi navegador el icono no hacía nada. La culpa era de la caché, y la solución, una línea.","datePublished":"2026-10-02","inLanguage":"es","url":"https://josejordan.dev/blog/el-service-worker-que-casi-me-la-lia/","mainEntityOfPage":"https://josejordan.dev/blog/el-service-worker-que-casi-me-la-lia/","keywords":"pwa, service-worker, cache, javascript, depuracion","author":{"@type":"Person","name":"Jose Jordan","url":"https://josejordan.dev/"},"image":"https://josejordan.dev/og.png?v=2"}
+    </script>
+
+    <script src="/lang.js"></script>
+    <link rel="preload" href="/fonts/JetBrainsMono-var.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/blog.css">
+</head>
+<body class="page-blog">
+    <header class="menubar">
+        <a class="menubar-brand" href="/">josejordan.dev</a>
+        <nav class="blog-nav" aria-label="Notas">
+            <a href="/blog/">Notas</a>
+            <a href="/blog/feed.xml">RSS</a>
+        </nav>
+    </header>
+    <main class="blog-main">
+        <article class="blog-window" aria-labelledby="post-title">
+            <div class="window-header blog-window-header">
+                <div class="traffic-lights" aria-hidden="true"><span class="light close"></span><span class="light minimize"></span><span class="light maximize"></span></div>
+                <span class="window-title">~/notas/el-service-worker-que-casi-me-la-lia.md</span>
+            </div>
+            <div class="blog-body">
+                <header class="post-header">
+                    <p class="post-meta"><time datetime="2026-10-02">2 de octubre de 2026</time> · 5 min de lectura</p>
+                    <h1 id="post-title">El service worker que casi me la lía</h1>
+                    <p class="post-lead">Añadí una ventana nueva a mi web, los tests pasaban y en mi navegador el icono no hacía nada. La culpa era de la caché, y la solución, una línea.</p>
+                    <ul class="post-tags"><li>#pwa</li><li>#service-worker</li><li>#cache</li><li>#javascript</li><li>#depuracion</li></ul>
+                    <p class="post-translation"><a href="/blog/the-service-worker-that-almost-got-me/" hreflang="en" lang="en">Read in English</a></p>
+                </header>
+                <div class="post-content">
+<p>Hace poco añadí a esta web una ventana nueva, <strong>Notas</strong>, la que lista las entradas de este blog. Tenía su icono en el escritorio, su botón en el dock y su comando en la terminal. Los tests pasaban en local y en GitHub Actions. Lo publiqué, abrí la web en mi navegador, pulsé el icono… y no pasó nada.</p>
+<p>Ni un error en pantalla. Simplemente, nada.</p>
+<h2 id="el-sintoma">El síntoma</h2>
+<p>El icono <strong>estaba</strong>: lo veía en el escritorio. Pero al pulsarlo la ventana no se abría. En un navegador limpio, en cambio, funcionaba perfectamente.</p>
+<p>Esa combinación ya es una pista: si el HTML nuevo está ahí pero el comportamiento nuevo no, lo más probable es que <strong>el navegador esté mezclando versiones</strong>. HTML de hoy con JavaScript de ayer.</p>
+<p>Y eso es justo lo que pasaba. El <code>index.html</code> nuevo traía el icono, pero mi navegador seguía ejecutando un <code>script.js</code> antiguo que no sabía nada de ninguna ventana Notas. El código buscaba la ventana, no la encontraba y no hacía nada. Silencio total.</p>
+<h2 id="pero-si-mi-service-worker-pide-primero-a-la-red">&quot;Pero si mi service worker pide primero a la red…&quot;</h2>
+<p>Esta web es una PWA y tiene un <em>service worker</em> precisamente para que funcione sin conexión. Cuando lo escribí elegí la estrategia <strong>network-first</strong>: para cada petición, primero se intenta la red y solo si falla se usa la copia guardada. La idea era evitar exactamente este problema: que cada despliegue se viera al momento y nunca se mezclaran versiones.</p>
+<p>El código era más o menos este:</p>
+<pre><code class="language-js">async function networkFirst(request) {
+    const cache = await caches.open(CACHE);
+    try {
+        const response = await fetch(request);
+        cache.put(request, response.clone());
+        return response;
+    } catch (error) {
+        return cache.match(request);
+    }
+}</code></pre>
+<p>Parece impecable. El problema está en una palabra: <code>fetch(request)</code> <strong>no significa &quot;ve al servidor&quot;</strong>. Significa &quot;consigue este recurso&quot;, y el navegador tiene su propia caché HTTP a la que puede recurrir antes de salir a la red.</p>
+<h2 id="la-cache-heuristica">La caché heurística</h2>
+<p>Cuando una respuesta trae una cabecera <code>Cache-Control</code> clara, el navegador obedece. Pero cuando no dice nada sobre cuánto tiempo se puede guardar, el estándar HTTP permite que el navegador <strong>decida por su cuenta</strong>. Es lo que se llama <em>caché heurística</em>: si el fichero lleva una fecha de última modificación, el navegador puede considerarlo válido durante una fracción del tiempo que lleva sin cambiar, típicamente un 10 %.</p>
+<p>Un <code>script.js</code> que no cambia en un mes puede darse por bueno durante unos tres días sin preguntar a nadie.</p>
+<p>En mi fichero <code>_headers</code>, el que le dice a Cloudflare qué cabeceras enviar, había reglas para las imágenes y las fuentes, pero <strong>ninguna para los scripts</strong>. El service worker hacía <code>fetch(request)</code>, el navegador consultaba su caché HTTP, veía una copia &quot;todavía válida&quot; según su heurística y la devolvía sin llegar a preguntar al servidor. El network-first nunca llegaba a la red.</p>
+<h2 id="reproducirlo-y-tropezar-por-el-camino">Reproducirlo (y tropezar por el camino)</h2>
+<p>Antes de arreglar nada quería ver el fallo en una prueba. Monté un servidor local que servía <code>script.js</code> sin <code>Cache-Control</code> y con una fecha de modificación antigua, y le añadía al final una marca de versión: <code>A</code> en la primera visita y <code>B</code> después de &quot;desplegar&quot;.</p>
+<p>La primera prueba, con Playwright, decía que seguía cargando <code>A</code> incluso con el arreglo puesto. Al contar las peticiones que llegaban al servidor, vi que en la segunda visita <strong>ni siquiera se pedía</strong> <code>script.js</code>. Chromium lo estaba sacando de su caché en memoria porque mi prueba navegaba otra vez dentro de la misma pestaña, algo que no pasa cuando un visitante vuelve días después.</p>
+<p>Cambié la prueba para abrir una pestaña nueva, como haría una visita real, y entonces sí:</p>
+<ul><li>con el service worker antiguo, la página seguía ejecutando la versión <code>A</code> y la petición no llegaba al servidor;</li><li>con el arreglo, el servidor recibía la petición y la página cargaba la versión <code>B</code>.</li></ul>
+<p>Moraleja dentro de la moraleja: <strong>cuando una prueba de caché te dé un resultado raro, cuenta las peticiones que llegan al servidor</strong> antes de fiarte de ella.</p>
+<h2 id="el-arreglo">El arreglo</h2>
+<p>La corrección principal es una sola opción en el <code>fetch</code> del service worker:</p>
+<pre><code class="language-js">const response = await fetch(request, { cache: 'no-cache' });</code></pre>
+<p><code>no-cache</code> no quiere decir &quot;no guardes nada&quot;, aunque el nombre confunda. Quiere decir &quot;<strong>puedes usar tu copia, pero pregunta antes al servidor si sigue valiendo</strong>&quot;. Si no ha cambiado, el servidor responde <code>304 Not Modified</code>, una respuesta minúscula, y se usa la copia. Si ha cambiado, llega la versión nueva. El coste es casi nulo y desaparece la mezcla de versiones.</p>
+<p>Para cubrir también las visitas que todavía no pasan por el service worker, añadí la misma instrucción a <code>_headers</code> para los ficheros que cambian en cada despliegue:</p>
+<pre><code>/script.js
+  Cache-Control: no-cache
+/styles.css
+  Cache-Control: no-cache</code></pre>
+<p>Y subí la versión del service worker para que los navegadores que ya tenían el antiguo instalasen el nuevo.</p>
+<h2 id="que-no-vuelva-a-pasar">Que no vuelva a pasar</h2>
+<p>Añadí un test que comprueba dos cosas: que el service worker hace sus peticiones con <code>cache: 'no-cache'</code> y que <code>_headers</code> incluye esa cabecera para los scripts y las hojas de estilo. Es un test sencillo, casi de texto, pero me avisará si un día alguien (probablemente yo) &quot;limpia&quot; esas líneas sin saber por qué están ahí.</p>
+<h2 id="lo-que-me-llevo">Lo que me llevo</h2>
+<ul><li><strong><code>fetch()</code> dentro de un service worker no garantiza ir a la red.</strong> Si quieres red de verdad, dilo con <code>cache: 'no-cache'</code> o <code>cache: 'reload'</code>.</li><li><strong>Si no le dices al navegador cuánto puede cachear, lo decidirá él.</strong> Pon <code>Cache-Control</code> explícito a todo lo que cambie con cada despliegue.</li><li><strong>&quot;HTML nuevo, comportamiento viejo&quot; casi siempre significa versiones mezcladas.</strong> Es lo primero que hay que mirar.</li><li><strong>Los tests en un navegador limpio no ven este tipo de fallos.</strong> Hay que simular al visitante que vuelve.</li></ul>
+<p>Lo mejor de tener un blog es que este fallo, en vez de quedarse en un commit, se ha convertido en una nota. Si te ha pasado algo parecido, escríbeme con <code>mail</code> desde la terminal: me encantará leerlo.</p>
+                </div>
+                <footer class="post-footer">
+                    <a href="/blog/">← Todas las notas</a>
+                    <a href="/">Volver al escritorio</a>
+                </footer>
+            </div>
+        </article>
+    </main>
+</body>
+</html>

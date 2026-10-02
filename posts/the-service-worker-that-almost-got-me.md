@@ -5,7 +5,6 @@ date: 2026-10-02
 lang: en
 tags: [pwa, service-worker, cache, javascript, debugging]
 translation: el-service-worker-que-casi-me-la-lia
-draft: true
 ---
 
 I recently added a new window to this site, **Notes**, the one that lists the posts on this blog. It had its icon on the desktop, its button in the dock and its command in the terminal. The tests passed locally and on GitHub Actions. I deployed it, opened the site in my browser, clicked the icon… and nothing happened.

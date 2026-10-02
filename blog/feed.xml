@@ -44,6 +44,63 @@
 <p>Si te interesa el código, está todo en <a href="https://github.com/mundodigitalpro/josejordandev" rel="noopener noreferrer">GitHub</a>. Y si quieres comentarme algo, escribe <code>mail</code> en la terminal.</p>]]></content:encoded>
     </item>
     <item>
+      <title>El service worker que casi me la lía</title>
+      <link>https://josejordan.dev/blog/el-service-worker-que-casi-me-la-lia/</link>
+      <guid isPermaLink="true">https://josejordan.dev/blog/el-service-worker-que-casi-me-la-lia/</guid>
+      <pubDate>Fri, 02 Oct 2026 08:00:00 GMT</pubDate>
+      <description>Añadí una ventana nueva a mi web, los tests pasaban y en mi navegador el icono no hacía nada. La culpa era de la caché, y la solución, una línea.</description>
+      <category>pwa</category>
+      <category>service-worker</category>
+      <category>cache</category>
+      <category>javascript</category>
+      <category>depuracion</category>
+      <content:encoded><![CDATA[<p>Hace poco añadí a esta web una ventana nueva, <strong>Notas</strong>, la que lista las entradas de este blog. Tenía su icono en el escritorio, su botón en el dock y su comando en la terminal. Los tests pasaban en local y en GitHub Actions. Lo publiqué, abrí la web en mi navegador, pulsé el icono… y no pasó nada.</p>
+<p>Ni un error en pantalla. Simplemente, nada.</p>
+<h2 id="el-sintoma">El síntoma</h2>
+<p>El icono <strong>estaba</strong>: lo veía en el escritorio. Pero al pulsarlo la ventana no se abría. En un navegador limpio, en cambio, funcionaba perfectamente.</p>
+<p>Esa combinación ya es una pista: si el HTML nuevo está ahí pero el comportamiento nuevo no, lo más probable es que <strong>el navegador esté mezclando versiones</strong>. HTML de hoy con JavaScript de ayer.</p>
+<p>Y eso es justo lo que pasaba. El <code>index.html</code> nuevo traía el icono, pero mi navegador seguía ejecutando un <code>script.js</code> antiguo que no sabía nada de ninguna ventana Notas. El código buscaba la ventana, no la encontraba y no hacía nada. Silencio total.</p>
+<h2 id="pero-si-mi-service-worker-pide-primero-a-la-red">&quot;Pero si mi service worker pide primero a la red…&quot;</h2>
+<p>Esta web es una PWA y tiene un <em>service worker</em> precisamente para que funcione sin conexión. Cuando lo escribí elegí la estrategia <strong>network-first</strong>: para cada petición, primero se intenta la red y solo si falla se usa la copia guardada. La idea era evitar exactamente este problema: que cada despliegue se viera al momento y nunca se mezclaran versiones.</p>
+<p>El código era más o menos este:</p>
+<pre><code class="language-js">async function networkFirst(request) {
+    const cache = await caches.open(CACHE);
+    try {
+        const response = await fetch(request);
+        cache.put(request, response.clone());
+        return response;
+    } catch (error) {
+        return cache.match(request);
+    }
+}</code></pre>
+<p>Parece impecable. El problema está en una palabra: <code>fetch(request)</code> <strong>no significa &quot;ve al servidor&quot;</strong>. Significa &quot;consigue este recurso&quot;, y el navegador tiene su propia caché HTTP a la que puede recurrir antes de salir a la red.</p>
+<h2 id="la-cache-heuristica">La caché heurística</h2>
+<p>Cuando una respuesta trae una cabecera <code>Cache-Control</code> clara, el navegador obedece. Pero cuando no dice nada sobre cuánto tiempo se puede guardar, el estándar HTTP permite que el navegador <strong>decida por su cuenta</strong>. Es lo que se llama <em>caché heurística</em>: si el fichero lleva una fecha de última modificación, el navegador puede considerarlo válido durante una fracción del tiempo que lleva sin cambiar, típicamente un 10 %.</p>
+<p>Un <code>script.js</code> que no cambia en un mes puede darse por bueno durante unos tres días sin preguntar a nadie.</p>
+<p>En mi fichero <code>_headers</code>, el que le dice a Cloudflare qué cabeceras enviar, había reglas para las imágenes y las fuentes, pero <strong>ninguna para los scripts</strong>. El service worker hacía <code>fetch(request)</code>, el navegador consultaba su caché HTTP, veía una copia &quot;todavía válida&quot; según su heurística y la devolvía sin llegar a preguntar al servidor. El network-first nunca llegaba a la red.</p>
+<h2 id="reproducirlo-y-tropezar-por-el-camino">Reproducirlo (y tropezar por el camino)</h2>
+<p>Antes de arreglar nada quería ver el fallo en una prueba. Monté un servidor local que servía <code>script.js</code> sin <code>Cache-Control</code> y con una fecha de modificación antigua, y le añadía al final una marca de versión: <code>A</code> en la primera visita y <code>B</code> después de &quot;desplegar&quot;.</p>
+<p>La primera prueba, con Playwright, decía que seguía cargando <code>A</code> incluso con el arreglo puesto. Al contar las peticiones que llegaban al servidor, vi que en la segunda visita <strong>ni siquiera se pedía</strong> <code>script.js</code>. Chromium lo estaba sacando de su caché en memoria porque mi prueba navegaba otra vez dentro de la misma pestaña, algo que no pasa cuando un visitante vuelve días después.</p>
+<p>Cambié la prueba para abrir una pestaña nueva, como haría una visita real, y entonces sí:</p>
+<ul><li>con el service worker antiguo, la página seguía ejecutando la versión <code>A</code> y la petición no llegaba al servidor;</li><li>con el arreglo, el servidor recibía la petición y la página cargaba la versión <code>B</code>.</li></ul>
+<p>Moraleja dentro de la moraleja: <strong>cuando una prueba de caché te dé un resultado raro, cuenta las peticiones que llegan al servidor</strong> antes de fiarte de ella.</p>
+<h2 id="el-arreglo">El arreglo</h2>
+<p>La corrección principal es una sola opción en el <code>fetch</code> del service worker:</p>
+<pre><code class="language-js">const response = await fetch(request, { cache: 'no-cache' });</code></pre>
+<p><code>no-cache</code> no quiere decir &quot;no guardes nada&quot;, aunque el nombre confunda. Quiere decir &quot;<strong>puedes usar tu copia, pero pregunta antes al servidor si sigue valiendo</strong>&quot;. Si no ha cambiado, el servidor responde <code>304 Not Modified</code>, una respuesta minúscula, y se usa la copia. Si ha cambiado, llega la versión nueva. El coste es casi nulo y desaparece la mezcla de versiones.</p>
+<p>Para cubrir también las visitas que todavía no pasan por el service worker, añadí la misma instrucción a <code>_headers</code> para los ficheros que cambian en cada despliegue:</p>
+<pre><code>/script.js
+  Cache-Control: no-cache
+/styles.css
+  Cache-Control: no-cache</code></pre>
+<p>Y subí la versión del service worker para que los navegadores que ya tenían el antiguo instalasen el nuevo.</p>
+<h2 id="que-no-vuelva-a-pasar">Que no vuelva a pasar</h2>
+<p>Añadí un test que comprueba dos cosas: que el service worker hace sus peticiones con <code>cache: 'no-cache'</code> y que <code>_headers</code> incluye esa cabecera para los scripts y las hojas de estilo. Es un test sencillo, casi de texto, pero me avisará si un día alguien (probablemente yo) &quot;limpia&quot; esas líneas sin saber por qué están ahí.</p>
+<h2 id="lo-que-me-llevo">Lo que me llevo</h2>
+<ul><li><strong><code>fetch()</code> dentro de un service worker no garantiza ir a la red.</strong> Si quieres red de verdad, dilo con <code>cache: 'no-cache'</code> o <code>cache: 'reload'</code>.</li><li><strong>Si no le dices al navegador cuánto puede cachear, lo decidirá él.</strong> Pon <code>Cache-Control</code> explícito a todo lo que cambie con cada despliegue.</li><li><strong>&quot;HTML nuevo, comportamiento viejo&quot; casi siempre significa versiones mezcladas.</strong> Es lo primero que hay que mirar.</li><li><strong>Los tests en un navegador limpio no ven este tipo de fallos.</strong> Hay que simular al visitante que vuelve.</li></ul>
+<p>Lo mejor de tener un blog es que este fallo, en vez de quedarse en un commit, se ha convertido en una nota. Si te ha pasado algo parecido, escríbeme con <code>mail</code> desde la terminal: me encantará leerlo.</p>]]></content:encoded>
+    </item>
+    <item>
       <title>How this site is built</title>
       <link>https://josejordan.dev/blog/how-this-site-is-built/</link>
       <guid isPermaLink="true">https://josejordan.dev/blog/how-this-site-is-built/</guid>
@@ -78,6 +135,63 @@
 <h2 id="and-this-blog">And this blog</h2>
 <p>I write each note in Markdown. A small script of my own, also dependency-free, turns it into an HTML page with its RSS entry, its sitemap entry and its social media tags. Publishing means adding a <code>.md</code> file and pushing.</p>
 <p>If you are curious about the code, it is all on <a href="https://github.com/mundodigitalpro/josejordandev" rel="noopener noreferrer">GitHub</a>. And if you want to tell me something, type <code>mail</code> in the terminal.</p>]]></content:encoded>
+    </item>
+    <item>
+      <title>The service worker that almost got me</title>
+      <link>https://josejordan.dev/blog/the-service-worker-that-almost-got-me/</link>
+      <guid isPermaLink="true">https://josejordan.dev/blog/the-service-worker-that-almost-got-me/</guid>
+      <pubDate>Fri, 02 Oct 2026 08:00:00 GMT</pubDate>
+      <description>I added a new window to my site, the tests passed, and in my browser the icon did nothing. The cache was to blame, and the fix was one line.</description>
+      <category>pwa</category>
+      <category>service-worker</category>
+      <category>cache</category>
+      <category>javascript</category>
+      <category>debugging</category>
+      <content:encoded><![CDATA[<p>I recently added a new window to this site, <strong>Notes</strong>, the one that lists the posts on this blog. It had its icon on the desktop, its button in the dock and its command in the terminal. The tests passed locally and on GitHub Actions. I deployed it, opened the site in my browser, clicked the icon… and nothing happened.</p>
+<p>No error on screen. Just nothing.</p>
+<h2 id="the-symptom">The symptom</h2>
+<p>The icon <strong>was there</strong>: I could see it on the desktop. But clicking it did not open the window. In a clean browser, on the other hand, it worked perfectly.</p>
+<p>That combination is already a clue: if the new HTML is there but the new behaviour is not, the browser is most likely <strong>mixing versions</strong>. Today's HTML with yesterday's JavaScript.</p>
+<p>And that is exactly what was happening. The new <code>index.html</code> had the icon, but my browser was still running an old <code>script.js</code> that knew nothing about a Notes window. The code looked for the window, did not find it, and did nothing. Total silence.</p>
+<h2 id="but-my-service-worker-goes-to-the-network-first">&quot;But my service worker goes to the network first…&quot;</h2>
+<p>This site is a PWA and has a service worker precisely so that it works offline. When I wrote it I chose a <strong>network-first</strong> strategy: for every request, try the network first and use the saved copy only if that fails. The whole point was to avoid this very problem: every deploy should show up immediately and versions should never mix.</p>
+<p>The code looked roughly like this:</p>
+<pre><code class="language-js">async function networkFirst(request) {
+    const cache = await caches.open(CACHE);
+    try {
+        const response = await fetch(request);
+        cache.put(request, response.clone());
+        return response;
+    } catch (error) {
+        return cache.match(request);
+    }
+}</code></pre>
+<p>It looks flawless. The problem is in one word: <code>fetch(request)</code> <strong>does not mean &quot;go to the server&quot;</strong>. It means &quot;get me this resource&quot;, and the browser has its own HTTP cache that it can use before going out to the network.</p>
+<h2 id="heuristic-caching">Heuristic caching</h2>
+<p>When a response carries a clear <code>Cache-Control</code> header, the browser obeys it. But when the response says nothing about how long it may be kept, the HTTP standard lets the browser <strong>decide for itself</strong>. This is called <em>heuristic caching</em>: if the file has a last-modified date, the browser may treat it as fresh for a fraction of the time since it last changed, typically 10%.</p>
+<p>A <code>script.js</code> that has not changed for a month can be considered good for about three days without asking anyone.</p>
+<p>My <code>_headers</code> file, which tells Cloudflare which headers to send, had rules for images and fonts, but <strong>none for the scripts</strong>. The service worker called <code>fetch(request)</code>, the browser checked its HTTP cache, saw a copy that was &quot;still fresh&quot; according to its heuristic and returned it without ever asking the server. Network-first never reached the network.</p>
+<h2 id="reproducing-it-and-tripping-on-the-way">Reproducing it (and tripping on the way)</h2>
+<p>Before fixing anything I wanted to see the bug in a test. I set up a local server that served <code>script.js</code> without <code>Cache-Control</code> and with an old modification date, and appended a version marker to it: <code>A</code> on the first visit and <code>B</code> after &quot;deploying&quot;.</p>
+<p>The first Playwright test said it was still loading <code>A</code>, even with the fix in place. When I counted the requests reaching the server, I saw that on the second visit <code>script.js</code> <strong>was not even requested</strong>. Chromium was taking it from its in-memory cache because my test navigated again inside the same tab, something that does not happen when a visitor comes back days later.</p>
+<p>I changed the test to open a new tab, like a real visit, and then it was clear:</p>
+<ul><li>with the old service worker, the page kept running version <code>A</code> and the request never reached the server;</li><li>with the fix, the server got the request and the page loaded version <code>B</code>.</li></ul>
+<p>A lesson inside the lesson: <strong>when a cache test gives you a strange result, count the requests that reach the server</strong> before trusting it.</p>
+<h2 id="the-fix">The fix</h2>
+<p>The main fix is a single option on the service worker's <code>fetch</code>:</p>
+<pre><code class="language-js">const response = await fetch(request, { cache: 'no-cache' });</code></pre>
+<p>Despite its confusing name, <code>no-cache</code> does not mean &quot;do not store anything&quot;. It means &quot;<strong>you may use your copy, but ask the server first whether it is still valid</strong>&quot;. If nothing changed, the server answers <code>304 Not Modified</code>, a tiny response, and the copy is used. If it changed, the new version arrives. The cost is almost zero and mixed versions are gone.</p>
+<p>To also cover visits that do not go through the service worker yet, I added the same instruction to <code>_headers</code> for the files that change on every deploy:</p>
+<pre><code>/script.js
+  Cache-Control: no-cache
+/styles.css
+  Cache-Control: no-cache</code></pre>
+<p>And I bumped the service worker version so that browsers with the old one installed would pick up the new one.</p>
+<h2 id="making-sure-it-does-not-happen-again">Making sure it does not happen again</h2>
+<p>I added a test that checks two things: that the service worker makes its requests with <code>cache: 'no-cache'</code> and that <code>_headers</code> includes that header for the scripts and stylesheets. It is a simple, almost textual test, but it will warn me if someone (probably me) ever &quot;cleans up&quot; those lines without knowing why they are there.</p>
+<h2 id="what-i-take-away">What I take away</h2>
+<ul><li><strong><code>fetch()</code> inside a service worker does not guarantee going to the network.</strong> If you really want the network, say so with <code>cache: 'no-cache'</code> or <code>cache: 'reload'</code>.</li><li><strong>If you do not tell the browser how long it may cache something, it will decide for you.</strong> Set an explicit <code>Cache-Control</code> on everything that changes with each deploy.</li><li><strong>&quot;New HTML, old behaviour&quot; almost always means mixed versions.</strong> It is the first thing to check.</li><li><strong>Tests in a clean browser do not catch this kind of bug.</strong> You have to simulate the returning visitor.</li></ul>
+<p>The best thing about having a blog is that this bug, instead of staying buried in a commit, became a note. If something similar has happened to you, write to me with <code>mail</code> from the terminal: I would love to read it.</p>]]></content:encoded>
     </item>
   </channel>
 </rss>

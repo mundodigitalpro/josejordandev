@@ -5,7 +5,6 @@ date: 2026-10-02
 lang: es
 tags: [pwa, service-worker, cache, javascript, depuracion]
 translation: the-service-worker-that-almost-got-me
-draft: true
 ---
 
 Hace poco añadí a esta web una ventana nueva, **Notas**, la que lista las entradas de este blog. Tenía su icono en el escritorio, su botón en el dock y su comando en la terminal. Los tests pasaban en local y en GitHub Actions. Lo publiqué, abrí la web en mi navegador, pulsé el icono… y no pasó nada.
