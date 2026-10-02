@@ -16,6 +16,7 @@ Sitio estático (HTML, CSS y JavaScript sin dependencias ni proceso de build) al
 | `styles.css` | Estilos del escritorio y la terminal |
 | `cv-jose-jordan.pdf` | CV que abren el comando `cv` y el icono CV |
 | `manifest.webmanifest`, `sw.js`, `icon-*.png` | PWA: la web se puede instalar y funciona sin conexión |
+| `tests/`, `.github/workflows/ci.yml` | Tests automáticos y su ejecución en GitHub Actions |
 | `404.html` | Página de error |
 | `privacy.html`, `privacy.css` | Política de privacidad de las apps |
 | `fonts/` | JetBrains Mono (SIL Open Font License) |
@@ -36,6 +37,16 @@ Para reproducir el comportamiento de Cloudflare (cabeceras, redirecciones y pág
 npx wrangler dev              # como Cloudflare Worker (incluye /api/contact; secretos en .dev.vars)
 npx wrangler pages dev .      # como Cloudflare Pages
 ```
+
+## Tests
+
+```bash
+node --test tests/*.test.mjs                 # comprobaciones del sitio y del formulario
+npm install --no-save playwright && npx playwright install chromium
+node --test tests/*.test.mjs                 # ahora también las pruebas en navegador
+```
+
+GitHub Actions (`.github/workflows/ci.yml`) ejecuta lo mismo en cada push a `main` y en cada pull request.
 
 ## Despliegue
 

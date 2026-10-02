@@ -8,5 +8,7 @@ CLAUDE.md
 README.md
 wrangler.jsonc
 worker
+tests
+.github
 node_modules
 .dev.vars

@@ -25,6 +25,8 @@ Static site: HTML, CSS and vanilla JavaScript. No build step, no package manager
 - **manifest.webmanifest** + **sw.js** + **icon-192.png**, **icon-512.png**, **icon-maskable-512.png**: installable PWA. `sw.js` is network-first for every same-origin GET (except `/api/`) and falls back to the cache offline, so a deploy is visible immediately and HTML/JS never mix versions; it precaches the core files (bump `VERSION` when changing `PRECACHE`). `script.js` registers it on HTTPS/localhost and opens the window named in `?open=` (`projects`, `contact`, `minesweeper`), used by the manifest shortcuts.
 - **cv-jose-jordan.pdf**: the CV opened by the `cv` command and the CV desktop icon (`cvUrl` in content.js).
 - **robots.txt**, **sitemap.xml**.
+- **tests/**: `node:test` suites, no package.json. `worker.test.mjs` (contact handler and MIME), `site.test.mjs` (ES/EN pages share the same tag skeleton, referenced files exist, CSP rules, JSON-LD, PWA files, content.js in both languages, repo-only files hidden), `e2e.test.mjs` (Playwright: terminal commands, themes, windows, contact form, mobile dock, offline; skipped when Playwright is not installed). `server.mjs` serves the site and runs `worker/contact.js` with a fake sender.
+- **.github/workflows/ci.yml**: on pushes to `main` and on pull requests, checks JS syntax, installs Playwright with `npm install --no-save` and runs `node --test tests/*.test.mjs`. It does not gate the Cloudflare deploy.
 
 ### Terminal commands
 Visible in `help`: `help`, `about`, `skills`, `projects`, `experience`, `education`, `contact`, `mail` (opens the contact form window; `mail <text>` prefills the message), `cv`, `open`, `lang`, `minesweeper` (opens the game window), `guess` (guess-the-number game inside the terminal; while it runs the prompt is `?` and input goes to the game), `theme` (lists or applies a desktop theme: `cordoba` default, `noche`, `mezquita`, `matrix`; saved in `localStorage`), `neofetch` (system info card with an ASCII horseshoe arch), `matrix` (full-screen digital rain on a canvas; stops on any key/tap or after 10 s; disabled with reduced motion), `clear`, `history`, `date`, `echo`, `joke`, `quote`. Command names are the same in both languages; `lang en` / `lang es` switches the version and saves the choice.
@@ -35,7 +37,7 @@ Hidden extras: `whoami`, `hostname`, `pwd`, `ls`, `cat`, `sudo`, `exit`, `hola`,
 - **Target: Cloudflare Workers** (`wrangler.jsonc`: worker `josejordan-portfolio`, `main: worker/index.js`, static assets from the repo root, `send_email` binding `MAILER`). Deploy with Workers Builds connected to GitHub or `npx wrangler deploy`. The contact form only works here, because Pages Functions cannot use `send_email`.
 - **Legacy: Cloudflare Pages** (project `josejordandev`, connected to GitHub; every push to `main` deploys; output directory is the repo root). Until the domain moves to the Worker, josejordan.dev is served from Pages: the site works the same but `/api/contact` does not exist, so the form falls back to `mailto:`. Pages ignores wrangler.jsonc.
 - **_headers**: security headers including a strict Content-Security-Policy (`script-src 'self'`, `style-src 'self'`; `challenges.cloudflare.com` is allowed in `script-src` and `frame-src` for Turnstile). Do not add inline `<script>` or `<style>` blocks or inline `style=""` attributes; put JS/CSS in files. JSON-LD blocks are fine.
-- **_redirects**: redirects repository files (CLAUDE.md, README.md, wrangler.jsonc, .gitignore, .assetsignore, worker/) to `/` so they are not exposed on Pages.
+- **_redirects**: redirects repository files (CLAUDE.md, README.md, wrangler.jsonc, .gitignore, .assetsignore, worker/, tests/, .github/) to `/` so they are not exposed on Pages.
 - **.assetsignore**: excludes the same files (plus `.dev.vars`) from Workers static asset uploads.
 - **404.html** (bilingual) is served for unknown paths (Pages does this automatically; Workers via `not_found_handling: "404-page"`).
 - **sitemap.xml** lists `/`, `/en/` (with `xhtml:link` alternates) and `/privacy`. The privacy policy exists only in Spanish.
@@ -46,6 +48,7 @@ Any static server works:
 - `python3 -m http.server 8000`
 - `npx wrangler dev` runs the Worker (static files, headers, redirects, 404 and `/api/contact`; put `CONTACT_TO=...` in a git-ignored `.dev.vars`). Locally, wrangler simulates `send_email` and writes the message to a file instead of sending it.
 - `npx wrangler pages dev .` reproduces the legacy Pages behaviour (no contact endpoint).
+- Tests: `node --test tests/*.test.mjs`. For the browser tests install Playwright first (`npm install --no-save playwright` and `npx playwright install chromium`) or point `NODE_PATH` at a global install. When you change structure, commands or files, keep the tests in step.
 
 ## Contact Information
 - **Developer**: Jose Jordan

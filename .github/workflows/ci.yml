@@ -1,0 +1,33 @@
+# Comprueba la web en cada push a main y en cada pull request.
+# No hay package.json: Playwright se instala solo para los tests y no se guarda.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Check JavaScript syntax
+        run: for file in *.js worker/*.js; do node --check "$file"; done
+
+      - name: Install Playwright
+        run: |
+          npm install --no-save --no-package-lock --no-audit --no-fund playwright@1.56.1
+          npx playwright install --with-deps chromium
+
+      - name: Run tests
+        run: node --test tests/*.test.mjs
