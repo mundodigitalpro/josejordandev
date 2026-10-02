@@ -22,6 +22,7 @@ Static site: HTML, CSS and vanilla JavaScript. No build step, no package manager
 - **privacy.html** + **privacy.css**: privacy policy for the mobile apps. Legal text must stay intact.
 - **fonts/**: JetBrains Mono variable font (subset, SIL OFL) and its license.
 - **favicon.svg**, **apple-touch-icon.png**, **og.png** (Spanish) and **og-en.png** (English): icons and social preview images. The `og:image` URLs carry a `?v=` version; bump it when regenerating an image, because the edge cache keeps the old one.
+- **manifest.webmanifest** + **sw.js** + **icon-192.png**, **icon-512.png**, **icon-maskable-512.png**: installable PWA. `sw.js` is network-first for every same-origin GET (except `/api/`) and falls back to the cache offline, so a deploy is visible immediately and HTML/JS never mix versions; it precaches the core files (bump `VERSION` when changing `PRECACHE`). `script.js` registers it on HTTPS/localhost and opens the window named in `?open=` (`projects`, `contact`, `minesweeper`), used by the manifest shortcuts.
 - **cv-jose-jordan.pdf**: the CV opened by the `cv` command and the CV desktop icon (`cvUrl` in content.js).
 - **robots.txt**, **sitemap.xml**.
 

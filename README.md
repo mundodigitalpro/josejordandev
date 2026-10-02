@@ -15,6 +15,7 @@ Sitio estático (HTML, CSS y JavaScript sin dependencias ni proceso de build) al
 | `worker/index.js`, `worker/contact.js` | Worker: sirve la web y envía el formulario de contacto con Cloudflare Email Routing |
 | `styles.css` | Estilos del escritorio y la terminal |
 | `cv-jose-jordan.pdf` | CV que abren el comando `cv` y el icono CV |
+| `manifest.webmanifest`, `sw.js`, `icon-*.png` | PWA: la web se puede instalar y funciona sin conexión |
 | `404.html` | Página de error |
 | `privacy.html`, `privacy.css` | Política de privacidad de las apps |
 | `fonts/` | JetBrains Mono (SIL Open Font License) |

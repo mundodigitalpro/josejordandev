@@ -1391,4 +1391,15 @@
     syncThemeColor();
     focusWindow(terminalWindow, true);
     if (!touchLike.matches) input.focus({ preventScroll: true });
+
+    /* Accesos directos de la app instalada: /?open=projects | contact | minesweeper */
+    const launch = windows.get(new URLSearchParams(location.search).get('open') || '');
+    if (launch && launch !== terminalWindow) openWindow(launch);
+
+    /* PWA: service worker para instalar la web y usarla sin conexión */
+    if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js').catch(() => { /* sin service worker la web funciona igual */ });
+        });
+    }
 })();

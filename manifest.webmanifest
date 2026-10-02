@@ -1,0 +1,24 @@
+{
+  "id": "/",
+  "name": "Jose Jordan · josejordan.dev",
+  "short_name": "josejordan",
+  "description": "Portfolio de Jose Jordan, desarrollador full stack en Córdoba: un escritorio con terminal interactiva, proyectos y contacto.",
+  "lang": "es",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#171321",
+  "theme_color": "#171321",
+  "categories": ["portfolio", "developer", "personalization"],
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ],
+  "shortcuts": [
+    { "name": "Proyectos", "short_name": "Proyectos", "url": "/?open=projects", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Contacto", "short_name": "Contacto", "url": "/?open=contact", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Buscaminas", "short_name": "Buscaminas", "url": "/?open=minesweeper", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] }
+  ]
+}
