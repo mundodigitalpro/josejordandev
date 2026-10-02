@@ -10,7 +10,8 @@
  *   ---
  *   title: Título de la nota
  *   description: Resumen de una o dos frases (para Google, RSS y redes)
- *   date: 2026-10-02
+ *   date: 2026-10-02             (o 2026-10-02 18:30, hora de España, para ordenar
+ *                                notas del mismo día: la más reciente sale primero)
  *   lang: es                      (es | en)
  *   tags: [web, javascript]
  *   translation: slug-de-la-otra-version   (opcional)
@@ -194,7 +195,8 @@ export function parsePost(source, file) {
     const slug = path.basename(file, '.md');
     if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) throw new Error(file + ': el nombre del fichero solo puede tener minúsculas, números y guiones');
     if (!meta.title) throw new Error(file + ': falta title');
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(meta.date || '')) throw new Error(file + ': date debe ser AAAA-MM-DD');
+    const when = String(meta.date || '').match(/^(\d{4}-\d{2}-\d{2})(?:[ T]([01]\d|2[0-3]):([0-5]\d))?$/);
+    if (!when) throw new Error(file + ': date debe ser AAAA-MM-DD o AAAA-MM-DD HH:MM');
     if (meta.lang !== 'es' && meta.lang !== 'en') throw new Error(file + ': lang debe ser es o en');
     const body = match[2].trim();
     const words = body.split(/\s+/).filter(Boolean).length;
@@ -202,7 +204,8 @@ export function parsePost(source, file) {
         slug,
         title: meta.title,
         description: meta.description || '',
-        date: meta.date,
+        date: when[1],
+        time: when[2] ? when[2] + ':' + when[3] : '',
         lang: meta.lang,
         tags: Array.isArray(meta.tags) ? meta.tags : meta.tags ? [meta.tags] : [],
         translation: meta.translation || '',
@@ -219,7 +222,7 @@ export function loadPosts(root = ROOT) {
     const posts = fs.readdirSync(dir).filter((file) => file.endsWith('.md')).sort()
         .map((file) => parsePost(fs.readFileSync(path.join(dir, file), 'utf8'), file))
         .filter((post) => !post.draft)
-        .sort((a, b) => b.date.localeCompare(a.date) || a.slug.localeCompare(b.slug));
+        .sort((a, b) => sortKey(b).localeCompare(sortKey(a)) || a.slug.localeCompare(b.slug));
     const bySlug = new Map(posts.map((post) => [post.slug, post]));
     for (const post of posts) {
         if (!post.translation) continue;
@@ -237,8 +240,26 @@ function formatDate(date, lang) {
     return L[lang].date(d, L[lang].months[m - 1], y);
 }
 
-function rfc822(date) {
+const sortKey = (post) => post.date + ' ' + (post.time || '00:00');
+
+// La hora de las notas es la de España (Europe/Madrid), con su cambio de horario
+function madridOffset(date, time) {
     const [y, m, d] = date.split('-').map(Number);
+    const [h, min] = time.split(':').map(Number);
+    const name = new Intl.DateTimeFormat('en-US', { timeZone: 'Europe/Madrid', timeZoneName: 'longOffset' })
+        .formatToParts(new Date(Date.UTC(y, m - 1, d, h, min)))
+        .find((part) => part.type === 'timeZoneName').value;
+    return name === 'GMT' ? '+00:00' : name.replace('GMT', '');
+}
+
+// Fecha ISO para datetime, JSON-LD y Open Graph: con hora y zona si la nota la indica
+function published(post) {
+    return post.time ? post.date + 'T' + post.time + ':00' + madridOffset(post.date, post.time) : post.date;
+}
+
+function rfc822(post) {
+    if (post.time) return new Date(published(post)).toUTCString();
+    const [y, m, d] = post.date.split('-').map(Number);
     return new Date(Date.UTC(y, m - 1, d, 8)).toUTCString();
 }
 
@@ -327,7 +348,7 @@ function renderPost(post, posts) {
         '@type': 'BlogPosting',
         headline: post.title,
         description: post.description,
-        datePublished: post.date,
+        datePublished: published(post),
         inLanguage: post.lang,
         url: SITE + post.url,
         mainEntityOfPage: SITE + post.url,
@@ -336,7 +357,7 @@ function renderPost(post, posts) {
         image: SITE + t.image
     };
     const extra = [
-        '    <meta property="article:published_time" content="' + post.date + '">',
+        '    <meta property="article:published_time" content="' + published(post) + '">',
         ...post.tags.map((tag) => '    <meta property="article:tag" content="' + escapeHtml(tag) + '">'),
         '',
         '    <script type="application/ld+json">',
@@ -349,7 +370,7 @@ function renderPost(post, posts) {
         menubar(post.lang),
         windowOpen('~/notas/' + post.slug + '.md', 'post-title'),
         '                <header class="post-header">',
-        '                    <p class="post-meta"><time datetime="' + post.date + '">' + formatDate(post.date, post.lang) + '</time> · ' + t.reading(post.readingMinutes) + '</p>',
+        '                    <p class="post-meta"><time datetime="' + published(post) + '">' + formatDate(post.date, post.lang) + '</time> · ' + t.reading(post.readingMinutes) + '</p>',
         '                    <h1 id="post-title">' + escapeHtml(post.title) + '</h1>',
         post.description ? '                    <p class="post-lead">' + escapeHtml(post.description) + '</p>' : '',
         '                    ' + tagsList(post.tags),
@@ -378,7 +399,7 @@ function renderIndex(lang, posts) {
     const items = list.length
         ? '<ol class="post-list">\n' + list.map((post) => [
             '                    <li>',
-            '                        <p class="post-meta"><time datetime="' + post.date + '">' + formatDate(post.date, lang) + '</time>' + (post.lang !== lang ? ' · <span lang="' + post.lang + '">' + t.otherLang + '</span>' : '') + '</p>',
+            '                        <p class="post-meta"><time datetime="' + published(post) + '">' + formatDate(post.date, lang) + '</time>' + (post.lang !== lang ? ' · <span lang="' + post.lang + '">' + t.otherLang + '</span>' : '') + '</p>',
             '                        <h2><a href="' + post.url + '"' + (post.lang !== lang ? ' hreflang="' + post.lang + '"' : '') + '>' + escapeHtml(post.title) + '</a></h2>',
             post.description ? '                        <p>' + escapeHtml(post.description) + '</p>' : '',
             '                        ' + tagsList(post.tags),
@@ -410,7 +431,7 @@ function renderFeed(posts) {
         '      <title>' + escapeHtml(post.title) + '</title>',
         '      <link>' + SITE + post.url + '</link>',
         '      <guid isPermaLink="true">' + SITE + post.url + '</guid>',
-        '      <pubDate>' + rfc822(post.date) + '</pubDate>',
+        '      <pubDate>' + rfc822(post) + '</pubDate>',
         '      <description>' + escapeHtml(post.description) + '</description>',
         ...post.tags.map((tag) => '      <category>' + escapeHtml(tag) + '</category>'),
         '      <content:encoded>' + cdata(post.html) + '</content:encoded>',
@@ -425,7 +446,7 @@ function renderFeed(posts) {
         '    <atom:link href="' + SITE + '/blog/feed.xml" rel="self" type="application/rss+xml"/>',
         '    <description>' + L.es.blogDescription + '</description>',
         '    <language>es</language>',
-        posts.length ? '    <lastBuildDate>' + rfc822(posts[0].date) + '</lastBuildDate>' : '',
+        posts.length ? '    <lastBuildDate>' + rfc822(posts[0]) + '</lastBuildDate>' : '',
         ...items,
         '  </channel>',
         '</rss>',

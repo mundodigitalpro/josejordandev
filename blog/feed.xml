@@ -6,48 +6,12 @@
     <atom:link href="https://josejordan.dev/blog/feed.xml" rel="self" type="application/rss+xml"/>
     <description>Notas de Jose Jordan sobre desarrollo web, datos, Python, Kotlin e inteligencia artificial.</description>
     <language>es</language>
-    <lastBuildDate>Fri, 02 Oct 2026 08:00:00 GMT</lastBuildDate>
-    <item>
-      <title>Cómo está hecha esta web</title>
-      <link>https://josejordan.dev/blog/como-esta-hecha-esta-web/</link>
-      <guid isPermaLink="true">https://josejordan.dev/blog/como-esta-hecha-esta-web/</guid>
-      <pubDate>Fri, 02 Oct 2026 08:00:00 GMT</pubDate>
-      <description>Un escritorio con terminal en HTML, CSS y JavaScript sin dependencias ni proceso de build, alojado gratis en Cloudflare.</description>
-      <category>web</category>
-      <category>javascript</category>
-      <category>cloudflare</category>
-      <category>pwa</category>
-      <content:encoded><![CDATA[<p>Quería que mi portfolio fuera algo más que una página con mi CV: un sitio que se pudiera <strong>usar</strong>. Por eso josejordan.dev es un pequeño escritorio con su barra de menú, sus iconos, un dock y una terminal desde la que puedes ver mi experiencia, mis proyectos o escribirme.</p>
-<h2 id="sin-dependencias-y-sin-build">Sin dependencias y sin build</h2>
-<p>Todo es HTML, CSS y JavaScript &quot;a pelo&quot;. No hay framework, ni <code>node_modules</code>, ni proceso de compilación: los ficheros del repositorio son exactamente los que se publican. La única fuente es JetBrains Mono, alojada en la propia web.</p>
-<p>Esto tiene ventajas muy prácticas:</p>
-<ul><li>La web carga rápido y no depende de que una librería siga mantenida dentro de cinco años.</li><li>Cualquier cambio se entiende leyendo un solo fichero.</li><li>Se puede alojar en cualquier sitio que sirva ficheros estáticos.</li></ul>
-<h2 id="un-gestor-de-ventanas-en-unas-pocas-funciones">Un gestor de ventanas en unas pocas funciones</h2>
-<p>Cada ventana (la terminal, Proyectos, Contacto, el Buscaminas y estas Notas) es un elemento HTML con una cabecera y unos botones. Un pequeño gestor en <code>script.js</code> se encarga de:</p>
-<ol><li>Arrastrarlas con Pointer Events, para que funcione igual con ratón y con el dedo.</li><li>Traer al frente la que pulsas.</li><li>Minimizarlas al dock, cerrarlas y maximizarlas.</li></ol>
-<p>En el móvil las ventanas pasan a ocupar la pantalla, porque arrastrar ventanas en 6 pulgadas no tiene sentido.</p>
-<h2 id="la-terminal">La terminal</h2>
-<p>La terminal tiene más de veinte comandos: <code>about</code>, <code>projects</code>, <code>experience</code>, <code>cv</code>, <code>mail</code>, <code>theme</code>, <code>neofetch</code>… y alguno escondido. Tiene historial con las flechas, autocompletado con <code>Tab</code> y sugerencias cuando te equivocas al escribir.</p>
-<p>Todo el contenido vive en <code>content.js</code>, separado de la lógica, y toda la salida se construye con nodos del DOM, nunca con <code>innerHTML</code>, así que lo que escribas en la terminal no puede inyectar HTML.</p>
-<h2 id="dos-idiomas-sin-duplicar-codigo">Dos idiomas sin duplicar código</h2>
-<p>La versión en español está en <code>/</code> y la inglesa en <code>/en/</code>. Un script mínimo detecta el idioma del navegador (o el que elegiste) y te lleva a tu versión, sin redirigir nunca a Google ni a las vistas previas de las redes sociales, para que cada versión se indexe en su dirección.</p>
-<h2 id="seguridad-una-csp-estricta">Seguridad: una CSP estricta</h2>
-<p>La web se sirve con una <em>Content Security Policy</em> que solo permite scripts y estilos de la propia web. Nada de <code>&lt;script&gt;</code> en línea ni atributos <code>style=&quot;&quot;</code>. Es una buena disciplina: obliga a tener el código ordenado y cierra la puerta a muchos ataques.</p>
-<h2 id="una-app-que-funciona-sin-conexion">Una app que funciona sin conexión</h2>
-<p>Es una PWA: puedes instalarla en el móvil o en el ordenador. Un <em>service worker</em> pide siempre primero la versión más reciente a la red y, si no hay conexión, sirve la copia guardada. Así cada cambio se ve al momento y, aun así, la web funciona en modo avión.</p>
-<h2 id="alojamiento-gratis-en-cloudflare">Alojamiento gratis en Cloudflare</h2>
-<p>Cloudflare publica la web automáticamente con cada push a GitHub. Al ser ficheros estáticos, el plan gratuito sobra: las visitas a páginas estáticas no tienen límite.</p>
-<h2 id="tests-en-cada-cambio">Tests en cada cambio</h2>
-<p>Hay tests con <code>node:test</code>, que viene con Node, y pruebas en un navegador real con Playwright: los comandos, las ventanas, el formulario, el modo sin conexión y que la versión española y la inglesa tengan la misma estructura. GitHub Actions los ejecuta en cada push.</p>
-<h2 id="y-este-blog">Y este blog</h2>
-<p>Escribo cada nota en Markdown. Un script propio, también sin dependencias, la convierte en una página HTML con su RSS, su entrada en el sitemap y sus etiquetas para redes sociales. Publicar es añadir un fichero <code>.md</code> y hacer push.</p>
-<p>Si te interesa el código, está todo en <a href="https://github.com/mundodigitalpro/josejordandev" rel="noopener noreferrer">GitHub</a>. Y si quieres comentarme algo, escribe <code>mail</code> en la terminal.</p>]]></content:encoded>
-    </item>
+    <lastBuildDate>Fri, 02 Oct 2026 16:30:00 GMT</lastBuildDate>
     <item>
       <title>El service worker que casi me la lía</title>
       <link>https://josejordan.dev/blog/el-service-worker-que-casi-me-la-lia/</link>
       <guid isPermaLink="true">https://josejordan.dev/blog/el-service-worker-que-casi-me-la-lia/</guid>
-      <pubDate>Fri, 02 Oct 2026 08:00:00 GMT</pubDate>
+      <pubDate>Fri, 02 Oct 2026 16:30:00 GMT</pubDate>
       <description>Añadí una ventana nueva a mi web, los tests pasaban y en mi navegador el icono no hacía nada. La culpa era de la caché, y la solución, una línea.</description>
       <category>pwa</category>
       <category>service-worker</category>
@@ -101,46 +65,10 @@
 <p>Lo mejor de tener un blog es que este fallo, en vez de quedarse en un commit, se ha convertido en una nota. Si te ha pasado algo parecido, escríbeme con <code>mail</code> desde la terminal: me encantará leerlo.</p>]]></content:encoded>
     </item>
     <item>
-      <title>How this site is built</title>
-      <link>https://josejordan.dev/blog/how-this-site-is-built/</link>
-      <guid isPermaLink="true">https://josejordan.dev/blog/how-this-site-is-built/</guid>
-      <pubDate>Fri, 02 Oct 2026 08:00:00 GMT</pubDate>
-      <description>A desktop with a terminal in plain HTML, CSS and JavaScript, with no dependencies or build step, hosted for free on Cloudflare.</description>
-      <category>web</category>
-      <category>javascript</category>
-      <category>cloudflare</category>
-      <category>pwa</category>
-      <content:encoded><![CDATA[<p>I wanted my portfolio to be more than a page with my CV: a site you can actually <strong>use</strong>. That is why josejordan.dev is a small desktop with a menu bar, icons, a dock and a terminal where you can browse my experience and projects, or write to me.</p>
-<h2 id="no-dependencies-no-build-step">No dependencies, no build step</h2>
-<p>Everything is plain HTML, CSS and JavaScript. There is no framework, no <code>node_modules</code> and no build step: the files in the repository are exactly the files that get published. The only font, JetBrains Mono, is self-hosted.</p>
-<p>This has very practical advantages:</p>
-<ul><li>The site loads fast and does not depend on a library still being maintained five years from now.</li><li>Any change can be understood by reading a single file.</li><li>It can be hosted anywhere that serves static files.</li></ul>
-<h2 id="a-window-manager-in-a-few-functions">A window manager in a few functions</h2>
-<p>Each window (the terminal, Projects, Contact, Minesweeper and these Notes) is an HTML element with a header and some buttons. A small manager in <code>script.js</code> takes care of:</p>
-<ol><li>Dragging them with Pointer Events, so it works the same with a mouse or a finger.</li><li>Bringing the one you click to the front.</li><li>Minimizing them to the dock, closing and maximizing them.</li></ol>
-<p>On phones the windows fill the screen, because dragging windows around on six inches makes no sense.</p>
-<h2 id="the-terminal">The terminal</h2>
-<p>The terminal has more than twenty commands: <code>about</code>, <code>projects</code>, <code>experience</code>, <code>cv</code>, <code>mail</code>, <code>theme</code>, <code>neofetch</code>… and a few hidden ones. It has history with the arrow keys, <code>Tab</code> completion and suggestions when you mistype.</p>
-<p>All the content lives in <code>content.js</code>, separate from the logic, and all output is built with DOM nodes, never with <code>innerHTML</code>, so whatever you type cannot inject HTML.</p>
-<h2 id="two-languages-without-duplicated-code">Two languages without duplicated code</h2>
-<p>The Spanish version lives at <code>/</code> and the English one at <code>/en/</code>. A tiny script detects your browser language (or the one you picked) and takes you to your version, without ever redirecting Google or social media previews, so each version is indexed at its own address.</p>
-<h2 id="security-a-strict-csp">Security: a strict CSP</h2>
-<p>The site is served with a Content Security Policy that only allows scripts and styles from the site itself. No inline <code>&lt;script&gt;</code> and no <code>style=&quot;&quot;</code> attributes. It is a good discipline: it keeps the code tidy and closes the door to many attacks.</p>
-<h2 id="an-app-that-works-offline">An app that works offline</h2>
-<p>It is a PWA: you can install it on your phone or computer. A service worker always asks the network for the latest version first and, when there is no connection, serves the saved copy. Every change shows up immediately and the site still works in airplane mode.</p>
-<h2 id="free-hosting-on-cloudflare">Free hosting on Cloudflare</h2>
-<p>Cloudflare publishes the site automatically on every push to GitHub. Since it is all static files, the free plan is more than enough: requests to static pages are unlimited.</p>
-<h2 id="tests-on-every-change">Tests on every change</h2>
-<p>There are tests with <code>node:test</code>, which ships with Node, and real-browser tests with Playwright: the commands, the windows, the contact form, offline mode and that the Spanish and English pages share the same structure. GitHub Actions runs them on every push.</p>
-<h2 id="and-this-blog">And this blog</h2>
-<p>I write each note in Markdown. A small script of my own, also dependency-free, turns it into an HTML page with its RSS entry, its sitemap entry and its social media tags. Publishing means adding a <code>.md</code> file and pushing.</p>
-<p>If you are curious about the code, it is all on <a href="https://github.com/mundodigitalpro/josejordandev" rel="noopener noreferrer">GitHub</a>. And if you want to tell me something, type <code>mail</code> in the terminal.</p>]]></content:encoded>
-    </item>
-    <item>
       <title>The service worker that almost got me</title>
       <link>https://josejordan.dev/blog/the-service-worker-that-almost-got-me/</link>
       <guid isPermaLink="true">https://josejordan.dev/blog/the-service-worker-that-almost-got-me/</guid>
-      <pubDate>Fri, 02 Oct 2026 08:00:00 GMT</pubDate>
+      <pubDate>Fri, 02 Oct 2026 16:30:00 GMT</pubDate>
       <description>I added a new window to my site, the tests passed, and in my browser the icon did nothing. The cache was to blame, and the fix was one line.</description>
       <category>pwa</category>
       <category>service-worker</category>
@@ -192,6 +120,78 @@
 <h2 id="what-i-take-away">What I take away</h2>
 <ul><li><strong><code>fetch()</code> inside a service worker does not guarantee going to the network.</strong> If you really want the network, say so with <code>cache: 'no-cache'</code> or <code>cache: 'reload'</code>.</li><li><strong>If you do not tell the browser how long it may cache something, it will decide for you.</strong> Set an explicit <code>Cache-Control</code> on everything that changes with each deploy.</li><li><strong>&quot;New HTML, old behaviour&quot; almost always means mixed versions.</strong> It is the first thing to check.</li><li><strong>Tests in a clean browser do not catch this kind of bug.</strong> You have to simulate the returning visitor.</li></ul>
 <p>The best thing about having a blog is that this bug, instead of staying buried in a commit, became a note. If something similar has happened to you, write to me with <code>mail</code> from the terminal: I would love to read it.</p>]]></content:encoded>
+    </item>
+    <item>
+      <title>Cómo está hecha esta web</title>
+      <link>https://josejordan.dev/blog/como-esta-hecha-esta-web/</link>
+      <guid isPermaLink="true">https://josejordan.dev/blog/como-esta-hecha-esta-web/</guid>
+      <pubDate>Fri, 02 Oct 2026 08:00:00 GMT</pubDate>
+      <description>Un escritorio con terminal en HTML, CSS y JavaScript sin dependencias ni proceso de build, alojado gratis en Cloudflare.</description>
+      <category>web</category>
+      <category>javascript</category>
+      <category>cloudflare</category>
+      <category>pwa</category>
+      <content:encoded><![CDATA[<p>Quería que mi portfolio fuera algo más que una página con mi CV: un sitio que se pudiera <strong>usar</strong>. Por eso josejordan.dev es un pequeño escritorio con su barra de menú, sus iconos, un dock y una terminal desde la que puedes ver mi experiencia, mis proyectos o escribirme.</p>
+<h2 id="sin-dependencias-y-sin-build">Sin dependencias y sin build</h2>
+<p>Todo es HTML, CSS y JavaScript &quot;a pelo&quot;. No hay framework, ni <code>node_modules</code>, ni proceso de compilación: los ficheros del repositorio son exactamente los que se publican. La única fuente es JetBrains Mono, alojada en la propia web.</p>
+<p>Esto tiene ventajas muy prácticas:</p>
+<ul><li>La web carga rápido y no depende de que una librería siga mantenida dentro de cinco años.</li><li>Cualquier cambio se entiende leyendo un solo fichero.</li><li>Se puede alojar en cualquier sitio que sirva ficheros estáticos.</li></ul>
+<h2 id="un-gestor-de-ventanas-en-unas-pocas-funciones">Un gestor de ventanas en unas pocas funciones</h2>
+<p>Cada ventana (la terminal, Proyectos, Contacto, el Buscaminas y estas Notas) es un elemento HTML con una cabecera y unos botones. Un pequeño gestor en <code>script.js</code> se encarga de:</p>
+<ol><li>Arrastrarlas con Pointer Events, para que funcione igual con ratón y con el dedo.</li><li>Traer al frente la que pulsas.</li><li>Minimizarlas al dock, cerrarlas y maximizarlas.</li></ol>
+<p>En el móvil las ventanas pasan a ocupar la pantalla, porque arrastrar ventanas en 6 pulgadas no tiene sentido.</p>
+<h2 id="la-terminal">La terminal</h2>
+<p>La terminal tiene más de veinte comandos: <code>about</code>, <code>projects</code>, <code>experience</code>, <code>cv</code>, <code>mail</code>, <code>theme</code>, <code>neofetch</code>… y alguno escondido. Tiene historial con las flechas, autocompletado con <code>Tab</code> y sugerencias cuando te equivocas al escribir.</p>
+<p>Todo el contenido vive en <code>content.js</code>, separado de la lógica, y toda la salida se construye con nodos del DOM, nunca con <code>innerHTML</code>, así que lo que escribas en la terminal no puede inyectar HTML.</p>
+<h2 id="dos-idiomas-sin-duplicar-codigo">Dos idiomas sin duplicar código</h2>
+<p>La versión en español está en <code>/</code> y la inglesa en <code>/en/</code>. Un script mínimo detecta el idioma del navegador (o el que elegiste) y te lleva a tu versión, sin redirigir nunca a Google ni a las vistas previas de las redes sociales, para que cada versión se indexe en su dirección.</p>
+<h2 id="seguridad-una-csp-estricta">Seguridad: una CSP estricta</h2>
+<p>La web se sirve con una <em>Content Security Policy</em> que solo permite scripts y estilos de la propia web. Nada de <code>&lt;script&gt;</code> en línea ni atributos <code>style=&quot;&quot;</code>. Es una buena disciplina: obliga a tener el código ordenado y cierra la puerta a muchos ataques.</p>
+<h2 id="una-app-que-funciona-sin-conexion">Una app que funciona sin conexión</h2>
+<p>Es una PWA: puedes instalarla en el móvil o en el ordenador. Un <em>service worker</em> pide siempre primero la versión más reciente a la red y, si no hay conexión, sirve la copia guardada. Así cada cambio se ve al momento y, aun así, la web funciona en modo avión.</p>
+<h2 id="alojamiento-gratis-en-cloudflare">Alojamiento gratis en Cloudflare</h2>
+<p>Cloudflare publica la web automáticamente con cada push a GitHub. Al ser ficheros estáticos, el plan gratuito sobra: las visitas a páginas estáticas no tienen límite.</p>
+<h2 id="tests-en-cada-cambio">Tests en cada cambio</h2>
+<p>Hay tests con <code>node:test</code>, que viene con Node, y pruebas en un navegador real con Playwright: los comandos, las ventanas, el formulario, el modo sin conexión y que la versión española y la inglesa tengan la misma estructura. GitHub Actions los ejecuta en cada push.</p>
+<h2 id="y-este-blog">Y este blog</h2>
+<p>Escribo cada nota en Markdown. Un script propio, también sin dependencias, la convierte en una página HTML con su RSS, su entrada en el sitemap y sus etiquetas para redes sociales. Publicar es añadir un fichero <code>.md</code> y hacer push.</p>
+<p>Si te interesa el código, está todo en <a href="https://github.com/mundodigitalpro/josejordandev" rel="noopener noreferrer">GitHub</a>. Y si quieres comentarme algo, escribe <code>mail</code> en la terminal.</p>]]></content:encoded>
+    </item>
+    <item>
+      <title>How this site is built</title>
+      <link>https://josejordan.dev/blog/how-this-site-is-built/</link>
+      <guid isPermaLink="true">https://josejordan.dev/blog/how-this-site-is-built/</guid>
+      <pubDate>Fri, 02 Oct 2026 08:00:00 GMT</pubDate>
+      <description>A desktop with a terminal in plain HTML, CSS and JavaScript, with no dependencies or build step, hosted for free on Cloudflare.</description>
+      <category>web</category>
+      <category>javascript</category>
+      <category>cloudflare</category>
+      <category>pwa</category>
+      <content:encoded><![CDATA[<p>I wanted my portfolio to be more than a page with my CV: a site you can actually <strong>use</strong>. That is why josejordan.dev is a small desktop with a menu bar, icons, a dock and a terminal where you can browse my experience and projects, or write to me.</p>
+<h2 id="no-dependencies-no-build-step">No dependencies, no build step</h2>
+<p>Everything is plain HTML, CSS and JavaScript. There is no framework, no <code>node_modules</code> and no build step: the files in the repository are exactly the files that get published. The only font, JetBrains Mono, is self-hosted.</p>
+<p>This has very practical advantages:</p>
+<ul><li>The site loads fast and does not depend on a library still being maintained five years from now.</li><li>Any change can be understood by reading a single file.</li><li>It can be hosted anywhere that serves static files.</li></ul>
+<h2 id="a-window-manager-in-a-few-functions">A window manager in a few functions</h2>
+<p>Each window (the terminal, Projects, Contact, Minesweeper and these Notes) is an HTML element with a header and some buttons. A small manager in <code>script.js</code> takes care of:</p>
+<ol><li>Dragging them with Pointer Events, so it works the same with a mouse or a finger.</li><li>Bringing the one you click to the front.</li><li>Minimizing them to the dock, closing and maximizing them.</li></ol>
+<p>On phones the windows fill the screen, because dragging windows around on six inches makes no sense.</p>
+<h2 id="the-terminal">The terminal</h2>
+<p>The terminal has more than twenty commands: <code>about</code>, <code>projects</code>, <code>experience</code>, <code>cv</code>, <code>mail</code>, <code>theme</code>, <code>neofetch</code>… and a few hidden ones. It has history with the arrow keys, <code>Tab</code> completion and suggestions when you mistype.</p>
+<p>All the content lives in <code>content.js</code>, separate from the logic, and all output is built with DOM nodes, never with <code>innerHTML</code>, so whatever you type cannot inject HTML.</p>
+<h2 id="two-languages-without-duplicated-code">Two languages without duplicated code</h2>
+<p>The Spanish version lives at <code>/</code> and the English one at <code>/en/</code>. A tiny script detects your browser language (or the one you picked) and takes you to your version, without ever redirecting Google or social media previews, so each version is indexed at its own address.</p>
+<h2 id="security-a-strict-csp">Security: a strict CSP</h2>
+<p>The site is served with a Content Security Policy that only allows scripts and styles from the site itself. No inline <code>&lt;script&gt;</code> and no <code>style=&quot;&quot;</code> attributes. It is a good discipline: it keeps the code tidy and closes the door to many attacks.</p>
+<h2 id="an-app-that-works-offline">An app that works offline</h2>
+<p>It is a PWA: you can install it on your phone or computer. A service worker always asks the network for the latest version first and, when there is no connection, serves the saved copy. Every change shows up immediately and the site still works in airplane mode.</p>
+<h2 id="free-hosting-on-cloudflare">Free hosting on Cloudflare</h2>
+<p>Cloudflare publishes the site automatically on every push to GitHub. Since it is all static files, the free plan is more than enough: requests to static pages are unlimited.</p>
+<h2 id="tests-on-every-change">Tests on every change</h2>
+<p>There are tests with <code>node:test</code>, which ships with Node, and real-browser tests with Playwright: the commands, the windows, the contact form, offline mode and that the Spanish and English pages share the same structure. GitHub Actions runs them on every push.</p>
+<h2 id="and-this-blog">And this blog</h2>
+<p>I write each note in Markdown. A small script of my own, also dependency-free, turns it into an HTML page with its RSS entry, its sitemap entry and its social media tags. Publishing means adding a <code>.md</code> file and pushing.</p>
+<p>If you are curious about the code, it is all on <a href="https://github.com/mundodigitalpro/josejordandev" rel="noopener noreferrer">GitHub</a>. And if you want to tell me something, type <code>mail</code> in the terminal.</p>]]></content:encoded>
     </item>
   </channel>
 </rss>

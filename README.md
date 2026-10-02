@@ -91,6 +91,8 @@ Para publicar una nota:
    ## Un apartado
    ```
 
+   La fecha puede llevar hora (`date: 2026-10-02 18:30`, hora de España) para que, si publicas dos notas el mismo día, la más reciente salga primero.
+
    Opcional: `translation: slug-de-la-version-en-ingles` para enlazar dos versiones de la misma nota, y `draft: true` para guardarla sin publicarla.
 3. Haz push a `main`. El workflow **Blog** genera las páginas, el RSS (`/blog/feed.xml`) y el sitemap, y sube el resultado; Cloudflare lo publica. Se puede hacer todo desde la web de GitHub (*Add file → Create new file* en la carpeta `posts`).
 

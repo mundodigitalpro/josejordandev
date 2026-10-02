@@ -60,3 +60,28 @@ test('the generated blog in the repository is up to date', () => {
     }
     assert.deepEqual(stale, []);
 });
+
+test('dates may carry a Spanish local time that orders notes of the same day', async () => {
+    const withTime = parsePost('---\ntitle: X\ndate: 2026-10-02 18:30\nlang: es\n---\n\nTexto.', 'x.md');
+    assert.equal(withTime.date, '2026-10-02');
+    assert.equal(withTime.time, '18:30');
+    assert.equal(parsePost('---\ntitle: X\ndate: 2026-10-02\nlang: es\n---\n', 'x.md').time, '');
+    assert.throws(() => parsePost('---\ntitle: X\ndate: 2026-10-02 25:00\nlang: es\n---\n', 'x.md'), /date/);
+
+    const fs = await import('node:fs');
+    const os = await import('node:os');
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'blog-'));
+    try {
+        fs.mkdirSync(path.join(root, 'posts'));
+        fs.writeFileSync(path.join(root, 'sitemap.xml'), '<urlset>\n</urlset>\n');
+        fs.writeFileSync(path.join(root, 'posts', 'a-temprano.md'), '---\ntitle: Temprano\ndate: 2026-12-01\nlang: es\n---\n\nUno.');
+        fs.writeFileSync(path.join(root, 'posts', 'b-tarde.md'), '---\ntitle: Tarde\ndate: 2026-12-01 18:30\nlang: es\n---\n\nDos.');
+        const { posts, files } = build(root);
+        assert.deepEqual(posts.map((post) => post.slug), ['b-tarde', 'a-temprano']);
+        // en invierno España está en +01:00
+        assert.match(files.get(path.join('blog', 'b-tarde', 'index.html')), /datetime="2026-12-01T18:30:00\+01:00"/);
+        assert.match(files.get(path.join('blog', 'feed.xml')), /<pubDate>Tue, 01 Dec 2026 17:30:00 GMT<\/pubDate>/);
+    } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+    }
+});

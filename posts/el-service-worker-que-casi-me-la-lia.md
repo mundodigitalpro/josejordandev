@@ -1,7 +1,7 @@
 ---
 title: El service worker que casi me la lía
 description: Añadí una ventana nueva a mi web, los tests pasaban y en mi navegador el icono no hacía nada. La culpa era de la caché, y la solución, una línea.
-date: 2026-10-02
+date: 2026-10-02 18:30
 lang: es
 tags: [pwa, service-worker, cache, javascript, depuracion]
 translation: the-service-worker-that-almost-got-me

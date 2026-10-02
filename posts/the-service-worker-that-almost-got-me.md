@@ -1,7 +1,7 @@
 ---
 title: The service worker that almost got me
 description: I added a new window to my site, the tests passed, and in my browser the icon did nothing. The cache was to blame, and the fix was one line.
-date: 2026-10-02
+date: 2026-10-02 18:30
 lang: en
 tags: [pwa, service-worker, cache, javascript, debugging]
 translation: el-service-worker-que-casi-me-la-lia
