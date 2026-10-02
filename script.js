@@ -24,6 +24,7 @@
     const clock = $('clock');
 
     const mobileLayout = window.matchMedia('(max-width: 720px)');
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     const touchLike = window.matchMedia('(hover: none) and (pointer: coarse)');
 
     /* ---------- Construcción de nodos ---------- */
@@ -89,6 +90,9 @@
                 lang: 'Cambia el idioma: lang en | lang es',
                 minesweeper: 'Abre el Buscaminas en su ventana',
                 guess: 'Juego: adivina el número del 1 al 100',
+                theme: 'Cambia el tema del escritorio: theme [nombre]',
+                neofetch: 'Ficha del sistema',
+                matrix: 'Lluvia de código (pulsa una tecla para salir)',
                 clear: 'Limpia la pantalla',
                 history: 'Muestra los últimos comandos',
                 date: 'Fecha y hora actual',
@@ -166,7 +170,31 @@
             contactCaptcha: 'Completa la verificación antes de enviar.',
             contactFailed: 'No se ha podido enviar el mensaje. Puedes escribirme directamente a ',
             contactOr: 'También puedes escribirme a ',
-            contactSubject: 'Contacto desde josejordan.dev'
+            contactSubject: 'Contacto desde josejordan.dev',
+            themes: {
+                cordoba: 'Atardecer sobre Córdoba (por defecto)',
+                noche: 'Noche azul junto al Guadalquivir',
+                mezquita: 'Rojo y crema de los arcos de la Mezquita',
+                matrix: 'Verde fósforo sobre negro'
+            },
+            themeHint: () => ['Escribe ', kbd('theme noche'), ' para cambiarlo. Se recuerda en tus próximas visitas.'],
+            themeUnknown: (name) => 'theme: no existe el tema «' + name + '».',
+            themeApplied: (name) => 'Tema «' + name + '» aplicado.',
+            themeCurrent: '(actual)',
+            neofetch: {
+                os: 'SO', location: 'Ubicación', kernel: 'Núcleo', uptime: 'Activo', shell: 'Shell',
+                resolution: 'Resolución', theme: 'Tema', language: 'Idioma', stack: 'Stack', commands: 'Comandos'
+            },
+            neofetchValues: {
+                os: 'josejordan.dev (escritorio web)',
+                location: 'Córdoba, España',
+                kernel: 'JavaScript sin dependencias',
+                language: 'español (lang en para inglés)',
+                commands: (n) => n + ' visibles, y alguno escondido'
+            },
+            uptime: (minutes) => (minutes < 1 ? 'menos de un minuto' : minutes + (minutes === 1 ? ' minuto' : ' minutos')),
+            matrixHint: 'Despierta, Neo… Pulsa cualquier tecla o toca la pantalla para salir.',
+            matrixReduced: 'Tienes activada la reducción de movimiento, así que la lluvia de código se queda en el tintero.'
         },
         en: {
             desc: {
@@ -183,6 +211,9 @@
                 lang: 'Switch language: lang en | lang es',
                 minesweeper: 'Open Minesweeper in its own window',
                 guess: 'Game: guess the number from 1 to 100',
+                theme: 'Change the desktop theme: theme [name]',
+                neofetch: 'System information',
+                matrix: 'Digital rain (press any key to stop)',
                 clear: 'Clear the screen',
                 history: 'Show recent commands',
                 date: 'Current date and time',
@@ -261,7 +292,31 @@
             contactCaptcha: 'Please complete the verification before sending.',
             contactFailed: 'The message could not be sent. You can write to me directly at ',
             contactOr: 'You can also write to me at ',
-            contactSubject: 'Contact from josejordan.dev'
+            contactSubject: 'Contact from josejordan.dev',
+            themes: {
+                cordoba: 'Sunset over Córdoba (default)',
+                noche: 'Blue night by the Guadalquivir',
+                mezquita: 'Red and cream of the Mezquita arches',
+                matrix: 'Phosphor green on black'
+            },
+            themeHint: () => ['Type ', kbd('theme noche'), ' to switch. It is remembered on your next visits.'],
+            themeUnknown: (name) => 'theme: there is no theme “' + name + '”.',
+            themeApplied: (name) => 'Theme “' + name + '” applied.',
+            themeCurrent: '(current)',
+            neofetch: {
+                os: 'OS', location: 'Location', kernel: 'Kernel', uptime: 'Uptime', shell: 'Shell',
+                resolution: 'Resolution', theme: 'Theme', language: 'Language', stack: 'Stack', commands: 'Commands'
+            },
+            neofetchValues: {
+                os: 'josejordan.dev (web desktop)',
+                location: 'Córdoba, Spain',
+                kernel: 'Dependency-free JavaScript',
+                language: 'English (lang es for Spanish)',
+                commands: (n) => n + ' visible, and a few hidden ones'
+            },
+            uptime: (minutes) => (minutes < 1 ? 'less than a minute' : minutes + (minutes === 1 ? ' minute' : ' minutes')),
+            matrixHint: 'Wake up, Neo… Press any key or tap the screen to stop.',
+            matrixReduced: 'Reduced motion is on, so the digital rain stays in the drawer.'
         }
     };
 
@@ -484,6 +539,108 @@
 
     function closeTerminal() {
         closeWindow(terminalWindow);
+    }
+
+    /* ---------- Temas ---------- */
+
+    const THEMES = ['cordoba', 'noche', 'mezquita', 'matrix'];
+    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+
+    function currentTheme() {
+        const theme = document.documentElement.getAttribute('data-theme');
+        return THEMES.includes(theme) ? theme : 'cordoba';
+    }
+
+    function syncThemeColor() {
+        const color = getComputedStyle(document.documentElement).getPropertyValue('--term-bg').trim();
+        if (themeColorMeta && color) themeColorMeta.content = color;
+    }
+
+    function applyTheme(name) {
+        if (name === 'cordoba') document.documentElement.removeAttribute('data-theme');
+        else document.documentElement.setAttribute('data-theme', name);
+        writeStorage('theme', name);
+        syncThemeColor();
+    }
+
+    /* ---------- neofetch y matrix ---------- */
+
+    // Un arco de herradura, como los de la Mezquita
+    const NEOFETCH_ART = [
+        "     .-'''''-.     ",
+        "   .'  .---.  '.   ",
+        "  /  .'     '.  \\  ",
+        " |  /         \\  | ",
+        " |  |         |  | ",
+        " |  |         |  | ",
+        " '--'         '--' "
+    ].join('\n');
+
+    const MATRIX_GLYPHS = 'アイウエオカキクケコサシスセソタチツテト0123456789JOSEJORDAN<>/{}[]=+*';
+
+    function startMatrix(out) {
+        if (reducedMotion.matches) {
+            out.muted(T.matrixReduced);
+            return;
+        }
+        if (document.querySelector('.matrix-rain')) return;
+        out.muted(T.matrixHint);
+
+        const canvas = el('canvas', 'matrix-rain');
+        canvas.setAttribute('aria-hidden', 'true');
+        document.body.append(canvas);
+        const ctx = canvas.getContext('2d');
+        const size = 16;
+        const color = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#3ddc63';
+        let width = 0;
+        let height = 0;
+        let drops = [];
+        let frame = 0;
+        let last = 0;
+
+        function resize() {
+            const ratio = window.devicePixelRatio || 1;
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = Math.round(width * ratio);
+            canvas.height = Math.round(height * ratio);
+            ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+            drops = Array.from({ length: Math.ceil(width / size) }, () => -Math.random() * height / size);
+        }
+
+        function draw(time) {
+            frame = requestAnimationFrame(draw);
+            if (time - last < 50) return;
+            last = time;
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+            ctx.fillRect(0, 0, width, height);
+            ctx.fillStyle = color;
+            ctx.font = size + 'px "JetBrains Mono", monospace';
+            drops.forEach((y, i) => {
+                ctx.fillText(MATRIX_GLYPHS[Math.floor(Math.random() * MATRIX_GLYPHS.length)], i * size, y * size);
+                drops[i] = y * size > height && Math.random() > 0.975 ? 0 : y + 1;
+            });
+        }
+
+        function stop() {
+            cancelAnimationFrame(frame);
+            clearTimeout(timer);
+            canvas.remove();
+            window.removeEventListener('resize', resize);
+            document.removeEventListener('keydown', stop, true);
+            document.removeEventListener('pointerdown', stop, true);
+        }
+
+        resize();
+        frame = requestAnimationFrame(draw);
+        const timer = setTimeout(stop, 10000);
+        window.addEventListener('resize', resize);
+        // Un instante de margen para que el Enter que lanzó el comando no la cierre
+        setTimeout(() => {
+            if (!canvas.isConnected) return;
+            document.addEventListener('keydown', stop, true);
+            document.addEventListener('pointerdown', stop, true);
+        }, 300);
     }
 
     /* ---------- Ventana de proyectos ---------- */
@@ -905,6 +1062,57 @@
 
     define('guess', (out) => startGuessGame(out));
 
+    define('theme', (out, args) => {
+        const target = (args[0] || '').toLowerCase();
+        if (!target) {
+            const rows = el('div', 'rows');
+            THEMES.forEach((name) => {
+                const description = [T.themes[name]];
+                if (name === currentTheme()) description.push(' ', el('span', 'muted', T.themeCurrent));
+                rows.append(el('span', 'key', name), el('span', null, description));
+            });
+            out.node(rows);
+            out.muted(T.themeHint());
+            return;
+        }
+        if (!THEMES.includes(target)) {
+            out.error(T.themeUnknown(args[0]));
+            out.muted(T.themeHint());
+            return;
+        }
+        applyTheme(target);
+        out.line(T.themeApplied(target));
+    });
+
+    define('neofetch', (out) => {
+        const N = T.neofetch;
+        const V = T.neofetchValues;
+        const visible = [...commands.values()].filter((cmd) => !cmd.hidden).length;
+        const stack = [...new Set((text.skills || []).map((group) => (group.items[0] || '').replace(/\s*\(.*\)$/, '')).filter(Boolean))].slice(0, 5).join(' · ');
+        const title = (site.user || 'jose') + '@' + (site.host || location.hostname);
+        const info = el('div', 'nf-info', [
+            el('p', 'nf-title', title),
+            el('p', 'nf-rule', '-'.repeat(title.length))
+        ]);
+        const add = (label, value) => { if (value) info.append(el('p', null, [el('span', 'key', label), ': ', value])); };
+        add(N.os, V.os);
+        add(N.location, V.location);
+        add(N.kernel, V.kernel);
+        add(N.uptime, T.uptime(Math.floor(performance.now() / 60000)));
+        add(N.shell, 'jsh 1.0');
+        add(N.resolution, window.screen ? screen.width + 'x' + screen.height : '');
+        add(N.theme, currentTheme());
+        add(N.language, V.language);
+        add(N.stack, stack);
+        add(N.commands, V.commands(visible));
+        info.append(el('p', 'nf-colors', ['nf-c1', 'nf-c2', 'nf-c3', 'nf-c4', 'nf-c5', 'nf-c6'].map((cls) => el('span', cls))));
+        const art = el('pre', 'nf-art', NEOFETCH_ART);
+        art.setAttribute('aria-hidden', 'true');
+        out.node(el('div', 'neofetch', [art, info]));
+    });
+
+    define('matrix', (out) => startMatrix(out));
+
     define('clear', () => {
         output.replaceChildren();
     });
@@ -972,7 +1180,7 @@
     const aliases = {
         ayuda: 'help', habilidades: 'skills', proyectos: 'projects', experiencia: 'experience', formacion: 'education', 'formación': 'education',
         contacto: 'contact', idioma: 'lang', buscaminas: 'minesweeper', mines: 'minesweeper', adivina: 'guess', limpiar: 'clear', fecha: 'date',
-        salir: 'exit', language: 'lang', resume: 'cv', mensaje: 'mail', message: 'mail', email: 'mail'
+        salir: 'exit', language: 'lang', resume: 'cv', tema: 'theme', fetch: 'neofetch', mensaje: 'mail', message: 'mail', email: 'mail'
     };
     Object.entries(aliases).forEach(([name, targetName]) => {
         const command = commands.get(targetName);
@@ -1180,6 +1388,7 @@
 
     /* ---------- Arranque ---------- */
 
+    syncThemeColor();
     focusWindow(terminalWindow, true);
     if (!touchLike.matches) input.focus({ preventScroll: true });
 })();

@@ -1,11 +1,20 @@
 /*
- * Se carga en <head> sin defer para redirigir antes de pintar la página.
+ * Se carga en <head> sin defer para redirigir antes de pintar la página
+ * (y para aplicar el tema guardado sin parpadeo).
  *
  * Regla: en las portadas (/ y /en/) el sitio se abre en el idioma elegido con
  * el selector o con "lang"; si no hay elección guardada, en el primer idioma
  * del navegador que sea español o inglés (inglés si no hay ninguno de los dos).
  * Los rastreadores no se redirigen: cada versión se indexa en su URL.
  */
+/* Tema del escritorio guardado con el comando "theme": se aplica antes de pintar para evitar un parpadeo */
+(function () {
+    try {
+        var theme = localStorage.getItem('theme');
+        if (theme && /^[a-z]+$/.test(theme)) document.documentElement.setAttribute('data-theme', theme);
+    } catch (error) { /* sin almacenamiento local */ }
+})();
+
 (function () {
     var current = document.documentElement.lang === 'en' ? 'en' : 'es';
     var path = location.pathname;

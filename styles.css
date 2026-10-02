@@ -27,6 +27,8 @@
 
     --desk-top: #1b1830;
     --desk-mid: #2c1f3f;
+    --glow-1: rgba(232, 120, 70, 0.42);   /* atardecer, abajo a la derecha */
+    --glow-2: rgba(84, 108, 190, 0.28);   /* cielo, arriba a la izquierda */
 
     --menubar-h: 30px;
     --icons-h: 0px;
@@ -34,6 +36,51 @@
     --dock-h: 46px;
     --radius: 12px;
     --shadow: 0 30px 80px rgba(6, 3, 12, 0.55), 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+
+/* Temas del escritorio (comando "theme"). El tema por defecto, "cordoba", son los valores de :root. */
+
+:root[data-theme="noche"] {
+    --ink: #e4ecf5;
+    --ink-muted: #8fa3bd;
+    --accent: #6cc4d4;
+    --gold: #f2d38a;
+    --sky: #9cc8ff;
+    --term-bg: #0e1626;
+    --term-chrome: #172238;
+    --desk-top: #070d1a;
+    --desk-mid: #12223b;
+    --glow-1: rgba(64, 168, 178, 0.32);
+    --glow-2: rgba(112, 96, 220, 0.3);
+}
+
+:root[data-theme="mezquita"] {
+    --ink: #f5e9d8;
+    --ink-muted: #c2a596;
+    --accent: #ec7a5c;
+    --gold: #f1d7a1;
+    --sky: #f0b98c;
+    --term-bg: #1c0f12;
+    --term-chrome: #2b161b;
+    --desk-top: #240c10;
+    --desk-mid: #4a191d;
+    --glow-1: rgba(226, 178, 120, 0.36);
+    --glow-2: rgba(190, 42, 46, 0.4);
+}
+
+:root[data-theme="matrix"] {
+    --ink: #c9f7d2;
+    --ink-muted: #6fa77b;
+    --accent: #3ddc63;
+    --gold: #a4f2b0;
+    --sky: #7ee2a8;
+    --error: #ff8a7a;
+    --term-bg: #050c07;
+    --term-chrome: #0b1a0f;
+    --desk-top: #010603;
+    --desk-mid: #06140a;
+    --glow-1: rgba(40, 200, 90, 0.22);
+    --glow-2: rgba(20, 120, 60, 0.25);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -49,8 +96,8 @@ body {
     color: var(--ink);
     background-color: var(--desk-mid);
     background-image:
-        radial-gradient(120% 90% at 88% 100%, rgba(232, 120, 70, 0.42), transparent 60%),
-        radial-gradient(80% 70% at 8% 0%, rgba(84, 108, 190, 0.28), transparent 60%),
+        radial-gradient(120% 90% at 88% 100%, var(--glow-1), transparent 60%),
+        radial-gradient(80% 70% at 8% 0%, var(--glow-2), transparent 60%),
         linear-gradient(180deg, var(--desk-top) 0%, var(--desk-mid) 100%);
     -webkit-font-smoothing: antialiased;
 }
@@ -859,6 +906,47 @@ ol.projects li::marker { color: var(--ink-muted); }
     color: var(--ink-muted);
 }
 
+/* neofetch */
+
+.neofetch {
+    display: flex;
+    align-items: flex-start;
+    gap: 22px;
+    margin: 4px 0;
+}
+
+.nf-art {
+    margin: 0;
+    font: inherit;
+    line-height: 1.35;
+    color: var(--accent);
+    flex: none;
+}
+
+.nf-info p { margin: 0; }
+.nf-title { color: var(--gold); font-weight: 700; }
+.nf-rule { color: var(--ink-muted); }
+.nf-info .key { color: var(--accent); font-weight: 700; }
+.nf-colors { display: flex; gap: 0; margin-top: 8px !important; }
+.nf-colors span { width: 22px; height: 14px; }
+.nf-c1 { background: var(--accent); }
+.nf-c2 { background: var(--gold); }
+.nf-c3 { background: var(--sky); }
+.nf-c4 { background: var(--error); }
+.nf-c5 { background: var(--ink-muted); }
+.nf-c6 { background: var(--ink); }
+
+/* matrix: lienzo a pantalla completa por encima de todo */
+.matrix-rain {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 200000;
+    pointer-events: auto;
+    cursor: pointer;
+}
+
 /* ---------- Línea de entrada ---------- */
 
 .input-line {
@@ -992,6 +1080,8 @@ ol.projects li::marker { color: var(--ink-muted); }
 
     .app-projects .window-body,
     .app-contact .window-body { padding: 14px; font-size: 14px; }
+    .neofetch { flex-direction: column; gap: 6px; }
+    .nf-art { font-size: 12px; }
     .pj-grid { grid-template-columns: 1fr; }
     .cf-input { font-size: 16px; }   /* evita el zoom automático de iOS al enfocar */
 

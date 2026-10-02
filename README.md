@@ -51,6 +51,7 @@ Los comandos de la terminal leen de `content.js`:
 - `minesweeper` (o `buscaminas`) abre el Buscaminas en una ventana; `guess` (o `adivina`) inicia el juego de adivinar el número dentro de la terminal.
 - El dock de la parte inferior muestra las apps abiertas: clic para abrir, traer al frente o recuperar una ventana minimizada.
 - `open <n>` abre el proyecto número `n` de la lista.
+- `theme` lista los temas del escritorio (`cordoba`, `noche`, `mezquita`, `matrix`) y `theme <nombre>` aplica uno y lo recuerda; `neofetch` muestra una ficha del sistema y `matrix` una lluvia de código.
 - El icono **Proyectos** abre una ventana con tarjetas y filtros por lenguaje, generada desde `projects` en `content.js` (campo opcional `demo` para enlazar una demo).
 - El icono **Contacto** y el comando `mail` (o `mail <texto>`) abren el formulario de contacto.
 
