@@ -39,3 +39,20 @@
 # El service worker siempre se revalida para que las actualizaciones lleguen enseguida
 /sw.js
   Cache-Control: no-cache
+
+# Código y datos que cambian con cada despliegue: el navegador siempre comprueba si hay
+# una versión nueva (sin esto podría reutilizar un script.js antiguo con un HTML nuevo)
+/script.js
+  Cache-Control: no-cache
+/content.js
+  Cache-Control: no-cache
+/lang.js
+  Cache-Control: no-cache
+/minesweeper.js
+  Cache-Control: no-cache
+/styles.css
+  Cache-Control: no-cache
+/blog.css
+  Cache-Control: no-cache
+/blog/posts.json
+  Cache-Control: no-cache

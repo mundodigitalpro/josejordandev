@@ -4,9 +4,12 @@
  * Estrategia: primero la red y, si falla, la copia guardada. Así cada despliegue
  * se ve al momento (nunca se mezcla HTML nuevo con JS viejo) y sin conexión
  * sigue funcionando todo lo que ya se haya visitado o esté en PRECACHE.
- * Sube VERSION si cambias la lista PRECACHE.
+ * Las peticiones a la red se hacen con cache: 'no-cache': el navegador siempre
+ * pregunta al servidor (con ETag, así que una respuesta 304 cuesta casi nada)
+ * en vez de reutilizar por su cuenta una copia antigua de su caché HTTP.
+ * Sube VERSION si cambias la lista PRECACHE o este fichero.
  */
-const VERSION = 'v1';
+const VERSION = 'v2';
 const CACHE = 'josejordan-' + VERSION;
 const PRECACHE = [
     '/',
@@ -23,7 +26,11 @@ const PRECACHE = [
 ];
 
 self.addEventListener('install', (event) => {
-    event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(PRECACHE)).then(() => self.skipWaiting()));
+    event.waitUntil(
+        caches.open(CACHE)
+            .then((cache) => cache.addAll(PRECACHE.map((url) => new Request(url, { cache: 'no-cache' }))))
+            .then(() => self.skipWaiting())
+    );
 });
 
 self.addEventListener('activate', (event) => {
@@ -44,7 +51,7 @@ self.addEventListener('fetch', (event) => {
 async function networkFirst(request, url) {
     const cache = await caches.open(CACHE);
     try {
-        const response = await fetch(request);
+        const response = await fetch(request, { cache: 'no-cache' });
         // Las redirecciones no se guardan: servirlas desde aquí rompe la navegación
         if (response.ok && response.type === 'basic' && !response.redirected) cache.put(request, response.clone());
         return response;

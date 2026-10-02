@@ -83,3 +83,12 @@ test('repository-only files are hidden from the deployed site', () => {
         assert.ok(ignored.split('\n').includes(entry), '.assetsignore misses ' + entry);
     }
 });
+
+test('code always revalidates, so a new HTML page never runs an old script', () => {
+    // Sin esto el navegador puede reutilizar un script.js antiguo de su caché HTTP (pasó con la ventana Notas)
+    assert.match(read('sw.js'), /fetch\(request, \{ cache: 'no-cache' \}\)/);
+    const headers = read('_headers');
+    for (const file of ['/sw.js', '/script.js', '/content.js', '/lang.js', '/minesweeper.js', '/styles.css', '/blog.css', '/blog/posts.json']) {
+        assert.match(headers, new RegExp('^' + file.replace(/[.*/]/g, '\\$&') + '\\n  Cache-Control: no-cache$', 'm'), file);
+    }
+});
